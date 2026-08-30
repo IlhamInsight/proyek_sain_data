@@ -38,6 +38,8 @@ jobs:
 
       - name: Build HTML Assets
         run: myst build --html
+        env:
+          MYST_SITE_BASE: /proyek-sain-data/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
