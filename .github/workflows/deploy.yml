@@ -28,7 +28,7 @@ jobs:
           node-version: 20
 
       - name: Build MyST Site
-        uses: jupyter-book/mystmd-action@v1
+        uses: mystmd-action/mystmd-action@v1
         with:
           action: build
           html: true
