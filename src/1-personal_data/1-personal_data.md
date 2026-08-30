@@ -11,7 +11,7 @@ date: 2026-08-27
     </tr>
     <tr>
       <td rowspan="4" style="width: 150px; vertical-align: middle; padding: 10px;">
-        <img src="/images/profil.jpg" class="border border-3 rounded shadow-sm" style="width: 100%;">
+        <img src="images/profil2.jpeg" class="border border-3 rounded shadow-sm" style="width: 100%;">
       </td>
       <th style="text-align: left;">Nama</th>
       <th style="text-align: left;">: Muhammad Ilham</th>
