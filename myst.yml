@@ -5,7 +5,7 @@ project:
   # title: Personal Data
   description: Proyek Sain Data merupakan Ilmu data (Data Science) menggabungkan matematika dan statistika, pemrograman khusus, analisis tingkat lanjut, kecerdasan buatan (AI), dan machine learning dengan keahlian bidang tertentu untuk mengungkap insight yang dapat ditindaklanjuti, yang tersembunyi dalam data organisasi. Insight ini dapat digunakan untuk memandu pengambilan keputusan dan perencanaan strategis.
   # keywords: []
-  authors: 
+  authors:
     - name: Muhammad Ilham
       id: "240411100187"
       email: ilhamm8615@gmail.com
@@ -20,6 +20,7 @@ project:
     - file: src/1-personal_data/1-personal_data.md
     - file: src/2-bussines_understanding/1-business.ipynb
     - file: src/3-data_understanding/1-data_understanding.ipynb
+    - file: src/4-data_preparation/1-data_preparation.ipynb
 
   # github:
   # To autogenerate a Table of Contents, run "jupyter book init --write-toc"
