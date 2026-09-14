@@ -17,7 +17,8 @@ project:
           department: Teknik Informatika
 
   toc:
-    - file: src/1-personal_data/1-personal_data.md
+    - file: src/0-personal_data/1-personal_data.md
+    - file: src/1-pengambilan_data/1-ambil_data.ipynb
     - file: src/2-bussines_understanding/1-business.ipynb
     - file: src/3-data_understanding/1-data_understanding.ipynb
     - file: src/4-data_preparation/1-data_preparation.ipynb

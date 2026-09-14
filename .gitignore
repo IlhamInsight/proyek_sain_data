@@ -20,3 +20,6 @@ Thumbs.db
 
 # Environment Variables
 .env
+*.env
+.env.*
+**/.env
