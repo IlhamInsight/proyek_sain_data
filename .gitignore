@@ -2,10 +2,30 @@
 venv/
 .venv/
 env/
+ENV/
+env.bak/
+venv.bak/
 
-# Python Cache
+# Python Cache & Bytecode
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Jupyter & MyST Build Output
 .ipynb_checkpoints/
@@ -17,9 +37,40 @@ _build/
 .idea/
 .DS_Store
 Thumbs.db
+desktop.ini
+*.swp
+*.swo
 
-# Environment Variables
+# Environment Variables & Secrets
 .env
 *.env
 .env.*
 **/.env
+.credentials/
+secrets/
+
+# Large Data & Spatial Files
+*.tif
+*.tiff
+*.geotiff
+*.img
+*.nc
+*.hdf
+*.hdf5
+*.h5
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.parquet
+*.feather
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Data directories (raw / downloaded crawl data)
+src/**/data/
+**/data/*.tif
+**/data/*.tiff
