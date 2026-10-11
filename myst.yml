@@ -18,11 +18,27 @@ project:
 
   toc:
     - file: src/0-personal_data/1-personal_data.md
-    - file: src/1-bussines_understanding/1-business.ipynb
-    - file: src/2-pengambilan_data/1-ambil_data.ipynb
-    - file: src/3-data_understanding/1-data_understanding.ipynb
-    - file: src/4-data_preparation/1-data_preparation.ipynb
-    - file: src/tugas-2/1-crawling/1-crawling_data.ipynb
+    - title: Tugas 1
+      children:
+        - file: src/1-bussines_understanding/1-business.ipynb
+        - file: src/2-pengambilan_data/1-ambil_data.ipynb
+        - file: src/3-data_understanding/1-data_understanding.ipynb
+        - file: src/4-data_preparation/1-data_preparation.ipynb
+    - title: Tugas 2
+      children:
+        - file: src/tugas-2/1-crawling/1-crawling_data.ipynb
+        - file: src/tugas-2/2-data_understanding/1-data_understanding.ipynb
+        - file: src/tugas-2/3-data_preparation/1-data_preparation.ipynb
+        - file: src/tugas-2/4-modeling/1-modeling.ipynb
+        - file: src/tugas-2/5-evaluation/1-evaluation.ipynb
+    - title: Tugas UTS
+      children:
+        - file: src/Tugas_UTS/1-business_understanding/1-business_understanding.ipynb
+        - file: src/Tugas_UTS/2-data_understanding/2-data_understanding.ipynb
+        - file: src/Tugas_UTS/3-data_preparation/3-data_preparation.ipynb
+        - file: src/Tugas_UTS/4-modeling/4-modeling.ipynb
+        - file: src/Tugas_UTS/5-evaluation/5-evaluation.ipynb
+        - file: src/Tugas_UTS/6-deployment/6-deployment.ipynb
 
   # github:
   # To autogenerate a Table of Contents, run "jupyter book init --write-toc"
