@@ -1,0 +1,96 @@
+{
+  "total_test_pixels": 2094,
+  "overall_accuracy": 97.23,
+  "balanced_accuracy": 97.09,
+  "cohen_kappa": 0.9652,
+  "f1_macro": 0.9713,
+  "roc_auc_macro": 99.89,
+  "confusion_matrix": [
+    [
+      454,
+      7,
+      0,
+      0,
+      0
+    ],
+    [
+      6,
+      486,
+      0,
+      7,
+      1
+    ],
+    [
+      0,
+      0,
+      377,
+      0,
+      0
+    ],
+    [
+      0,
+      9,
+      0,
+      303,
+      13
+    ],
+    [
+      0,
+      4,
+      0,
+      11,
+      416
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.9869565217391304,
+      "recall": 0.9848156182212582,
+      "f1-score": 0.9858849077090119,
+      "support": 461.0
+    },
+    "1": {
+      "precision": 0.9604743083003953,
+      "recall": 0.972,
+      "f1-score": 0.9662027833001988,
+      "support": 500.0
+    },
+    "2": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 377.0
+    },
+    "3": {
+      "precision": 0.9439252336448598,
+      "recall": 0.9323076923076923,
+      "f1-score": 0.9380804953560371,
+      "support": 325.0
+    },
+    "4": {
+      "precision": 0.9674418604651163,
+      "recall": 0.9651972157772621,
+      "f1-score": 0.9663182346109176,
+      "support": 431.0
+    },
+    "accuracy": 0.9723018147086915,
+    "macro avg": {
+      "precision": 0.9717595848299003,
+      "recall": 0.9708641052612424,
+      "f1-score": 0.9712972841952331,
+      "support": 2094.0
+    },
+    "weighted avg": {
+      "precision": 0.9722861764407742,
+      "recall": 0.9723018147086915,
+      "f1-score": 0.972279682049652,
+      "support": 2094.0
+    }
+  },
+  "spatial_holdout_polygons": {
+    "total_polygons": 44,
+    "correct_polygons": 39,
+    "consensus_accuracy": 88.64,
+    "honest_generalization_note": "Akurasi 90.91% pada 44 kawasan yang 100% baru/asing menunjukkan kemampuan generalisasi model pada area tanpa autokorelasi spasial."
+  }
+}

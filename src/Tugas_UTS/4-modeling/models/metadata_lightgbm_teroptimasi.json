@@ -1,0 +1,52 @@
+{
+  "label_file": "model_lightgbm_teroptimasi.pkl",
+  "nama_model": "LightGBM Classifier (Tuned Single Model)",
+  "arsitektur": "Histogram-Based Gradient Boosted Decision Tree (LightGBM)",
+  "paradigma": "1 Model Tunggal Teroptimasi",
+  "jumlah_fitur": 13,
+  "daftar_fitur": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B8A",
+    "B11",
+    "B12",
+    "NDVI",
+    "MNDWI",
+    "NDBI",
+    "Mangrove_Index_8A_11_4",
+    "EVI",
+    "BSI"
+  ],
+  "kelas_target": {
+    "0": {
+      "nama_kelas": "Bangunan",
+      "alias": "Built-up",
+      "kode_warna": "#EF4444"
+    },
+    "1": {
+      "nama_kelas": "Lahan Pertanian",
+      "alias": "Farmland",
+      "kode_warna": "#D97706"
+    },
+    "2": {
+      "nama_kelas": "Perairan",
+      "alias": "Water Body",
+      "kode_warna": "#0284C7"
+    },
+    "3": {
+      "nama_kelas": "Hutan Daratan",
+      "alias": "Terrestrial Forest",
+      "kode_warna": "#16A34A"
+    },
+    "4": {
+      "nama_kelas": "Hutan Mangrove",
+      "alias": "Mangrove Forest",
+      "kode_warna": "#0D9488"
+    }
+  },
+  "n_sampel_latih": 173,
+  "rata_rata_akurasi_cv": 0.7919327731092438,
+  "standar_deviasi_cv": 0.03867956866160779
+}

@@ -1,0 +1,48 @@
+{
+  "label_file": "model_lightgbm_piksel.pkl",
+  "nama_model": "LightGBM Pixel Classifier (Tuned Single Model - 10m Resolution)",
+  "paradigma": "1 Model Tunggal Teroptimasi Tingkat Piksel 10m",
+  "daftar_fitur": [
+    "B02",
+    "B03",
+    "B04",
+    "B08",
+    "B8A",
+    "B11",
+    "B12",
+    "NDVI",
+    "MNDWI",
+    "NDBI",
+    "Mangrove_Index_8A_11_4",
+    "EVI",
+    "BSI"
+  ],
+  "kelas_target": {
+    "0": {
+      "nama_kelas": "Bangunan",
+      "alias": "Built-up",
+      "kode_warna": "#EF4444"
+    },
+    "1": {
+      "nama_kelas": "Lahan Pertanian",
+      "alias": "Farmland",
+      "kode_warna": "#D97706"
+    },
+    "2": {
+      "nama_kelas": "Perairan",
+      "alias": "Water Body",
+      "kode_warna": "#0284C7"
+    },
+    "3": {
+      "nama_kelas": "Hutan Daratan",
+      "alias": "Terrestrial Forest",
+      "kode_warna": "#16A34A"
+    },
+    "4": {
+      "nama_kelas": "Hutan Mangrove",
+      "alias": "Mangrove Forest",
+      "kode_warna": "#0D9488"
+    }
+  },
+  "total_piksel_latih": 8375
+}
