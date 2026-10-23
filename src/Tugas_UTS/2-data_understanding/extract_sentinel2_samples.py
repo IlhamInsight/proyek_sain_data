@@ -187,19 +187,22 @@ def process_all_samples():
                         else:
                             pixels = masked_image[:, valid_mask]
 
-                        # Calculate polygon summary stats
+                        # hitung statistik ringkasan poligon
                         mean_bands = np.nanmean(pixels, axis=1)
                         median_bands = np.nanmedian(pixels, axis=1)
                         std_bands = np.nanstd(pixels, axis=1)
 
                         b2, b3, b4, b8, b8a, b11, b12 = mean_bands
 
-                        # Calculate spectral indices
-                        ndvi = (b8 - b4) / (b8 + b4 + 1e-8)
-                        mndwi = (b3 - b11) / (b3 + b11 + 1e-8)
-                        ndbi = (b11 - b8) / (b11 + b8 + 1e-8)
-                        b8a_11_ratio = b8a / (b11 + 1e-8)
-                        mvi_mangrove = (b8a - b4) / (b11 + 1e-8)
+                        # kalkulasi 5 indeks biofisik terarah
+                        eps = 1e-6
+                        remi = (b8a - b4) / ((b11 - b3) + eps)
+                        ndvi = (b8 - b4) / (b8 + b4 + eps)
+                        ndbi = (b11 - b8) / (b11 + b8 + eps)
+                        savi = ((b8 - b4) * 1.5) / (b8 + b4 + 0.5 + eps)
+                        mndwi = (b3 - b11) / (b3 + b11 + eps)
+                        ibi = (ndbi - (savi + mndwi) / 2.0) / (ndbi + (savi + mndwi) / 2.0 + eps)
+                        ndwi = (b3 - b8) / (b3 + b8 + eps)
 
                         polygon_records.append({
                             'sample_id': f"{class_name}_{i+1:03d}",
@@ -212,28 +215,30 @@ def process_all_samples():
                             'B8A': b8a,
                             'B11': b11,
                             'B12': b12,
+                            'REMI': remi,
                             'NDVI': ndvi,
+                            'IBI': ibi,
                             'MNDWI': mndwi,
-                            'NDBI': ndbi,
-                            'B8A_B11_Ratio': b8a_11_ratio,
-                            'Mangrove_Index_8A_11_4': mvi_mangrove,
+                            'NDWI': ndwi,
                             'centroid_lon': geom.centroid.x,
                             'centroid_lat': geom.centroid.y,
                             'pixel_count': pixels.shape[1]
                         })
 
-                        # Sample up to 50 representative pixels per polygon for high-res dataset
+                        # subsampel representatif piksel per poligon
                         n_subsample = min(pixels.shape[1], 50)
                         chosen_indices = np.random.choice(pixels.shape[1], n_subsample, replace=False)
                         sub_pixels = pixels[:, chosen_indices]
 
                         for p_idx in range(n_subsample):
                             pb2, pb3, pb4, pb8, pb8a, pb11, pb12 = sub_pixels[:, p_idx]
-                            p_ndvi = (pb8 - pb4) / (pb8 + pb4 + 1e-8)
-                            p_mndwi = (pb3 - pb11) / (pb3 + pb11 + 1e-8)
-                            p_ndbi = (pb11 - pb8) / (pb11 + pb8 + 1e-8)
-                            p_b8a_11_ratio = pb8a / (pb11 + 1e-8)
-                            p_mvi = (pb8a - pb4) / (pb11 + 1e-8)
+                            p_remi = (pb8a - pb4) / ((pb11 - pb3) + eps)
+                            p_ndvi = (pb8 - pb4) / (pb8 + pb4 + eps)
+                            p_ndbi = (pb11 - pb8) / (pb11 + pb8 + eps)
+                            p_savi = ((pb8 - pb4) * 1.5) / (pb8 + pb4 + 0.5 + eps)
+                            p_mndwi = (pb3 - pb11) / (pb3 + pb11 + eps)
+                            p_ibi = (p_ndbi - (p_savi + p_mndwi) / 2.0) / (p_ndbi + (p_savi + p_mndwi) / 2.0 + eps)
+                            p_ndwi = (pb3 - pb8) / (pb3 + pb8 + eps)
 
                             pixel_records.append({
                                 'sample_id': f"{class_name}_{i+1:03d}",
@@ -246,17 +251,17 @@ def process_all_samples():
                                 'B8A': pb8a,
                                 'B11': pb11,
                                 'B12': pb12,
+                                'REMI': p_remi,
                                 'NDVI': p_ndvi,
+                                'IBI': p_ibi,
                                 'MNDWI': p_mndwi,
-                                'NDBI': p_ndbi,
-                                'B8A_B11_Ratio': p_b8a_11_ratio,
-                                'Mangrove_Index_8A_11_4': p_mvi
+                                'NDWI': p_ndwi
                             })
 
             except Exception as e:
                 print(f"   Error saat memproses raster sampel #{i+1}: {e}")
 
-            # Small sleep to be polite to API rate limits
+            # jeda rate limit api
             time.sleep(0.1)
 
         print(f" Berhasil mengekstrak kelas {class_name.upper()}.")
@@ -278,7 +283,7 @@ def process_all_samples():
     print("\nDistribusi Sampel per Kelas:")
     print(df_poly['class_name'].value_counts())
     print("\nContoh 5 baris teratas:")
-    print(df_poly[['sample_id', 'class_name', 'B04', 'B8A', 'B11', 'NDVI', 'Mangrove_Index_8A_11_4']].head())
+    print(df_poly[['sample_id', 'class_name', 'B04', 'B8A', 'B11', 'REMI', 'NDVI', 'IBI', 'MNDWI', 'NDWI']].head())
 
 if __name__ == '__main__':
     process_all_samples()

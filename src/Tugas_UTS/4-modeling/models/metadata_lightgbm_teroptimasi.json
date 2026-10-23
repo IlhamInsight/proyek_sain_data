@@ -1,9 +1,20 @@
 {
   "label_file": "model_lightgbm_teroptimasi.pkl",
-  "nama_model": "LightGBM Classifier (Tuned Single Model)",
+  "nama_model": "LightGBM Classifier (Tuned Single Model - Polygon Level)",
   "arsitektur": "Histogram-Based Gradient Boosted Decision Tree (LightGBM)",
   "paradigma": "1 Model Tunggal Teroptimasi",
-  "jumlah_fitur": 13,
+  "hiperparameter": {
+    "n_estimators": 100,
+    "learning_rate": 0.05,
+    "max_depth": 5,
+    "num_leaves": 15,
+    "min_child_samples": 5,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_alpha": 0.1,
+    "reg_lambda": 1.0
+  },
+  "jumlah_fitur": 12,
   "daftar_fitur": [
     "B02",
     "B03",
@@ -12,12 +23,11 @@
     "B8A",
     "B11",
     "B12",
+    "REMI",
     "NDVI",
+    "IBI",
     "MNDWI",
-    "NDBI",
-    "Mangrove_Index_8A_11_4",
-    "EVI",
-    "BSI"
+    "NDWI"
   ],
   "kelas_target": {
     "0": {
@@ -46,7 +56,7 @@
       "kode_warna": "#0D9488"
     }
   },
-  "n_sampel_latih": 173,
-  "rata_rata_akurasi_cv": 0.7919327731092438,
-  "standar_deviasi_cv": 0.03867956866160779
+  "n_sampel_latih": 174,
+  "rata_rata_akurasi_cv": 0.7988235294117647,
+  "standar_deviasi_cv": 0.018222704092006464
 }

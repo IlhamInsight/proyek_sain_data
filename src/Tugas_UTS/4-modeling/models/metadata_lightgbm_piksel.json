@@ -1,7 +1,20 @@
 {
   "label_file": "model_lightgbm_piksel.pkl",
-  "nama_model": "LightGBM Pixel Classifier (Tuned Single Model - 10m Resolution)",
+  "nama_model": "LightGBM Pixel Classifier (Tuned & Regularized - 10m Resolution)",
   "paradigma": "1 Model Tunggal Teroptimasi Tingkat Piksel 10m",
+  "arsitektur": "Histogram-Based Gradient Boosted Decision Tree (LightGBM)",
+  "hiperparameter": {
+    "n_estimators": 120,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "num_leaves": 20,
+    "min_child_samples": 35,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_alpha": 0.2,
+    "reg_lambda": 1.5
+  },
+  "jumlah_fitur": 12,
   "daftar_fitur": [
     "B02",
     "B03",
@@ -10,12 +23,11 @@
     "B8A",
     "B11",
     "B12",
+    "REMI",
     "NDVI",
+    "IBI",
     "MNDWI",
-    "NDBI",
-    "Mangrove_Index_8A_11_4",
-    "EVI",
-    "BSI"
+    "NDWI"
   ],
   "kelas_target": {
     "0": {
@@ -44,5 +56,7 @@
       "kode_warna": "#0D9488"
     }
   },
-  "total_piksel_latih": 8375
+  "total_piksel_latih": 8429,
+  "rata_rata_akurasi_cv": 0.9512402716031131,
+  "standar_deviasi_cv": 0.005526913270827394
 }
