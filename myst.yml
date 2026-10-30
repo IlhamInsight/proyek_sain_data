@@ -16,6 +16,10 @@ project:
           institution: Universitas Trunodjoyo Madura
           department: Teknik Informatika
 
+  exclude:
+    - README.md
+    - "**/README.md"
+
   toc:
     - file: src/0-personal_data/1-personal_data.md
     - title: Tugas 1
@@ -39,6 +43,14 @@ project:
         - file: src/Tugas_UTS/4-modeling/4-modeling.ipynb
         - file: src/Tugas_UTS/5-evaluation/5-evaluation.ipynb
         - file: src/Tugas_UTS/6-deployment/6-deployment.ipynb
+    - title: Project Akhir (SER - RAVDESS)
+      children:
+        - file: src/project_akhir/1-business_understading/1-business.md
+        - file: src/project_akhir/2-data_understanding/1-data_understanding.ipynb
+        - file: src/project_akhir/3-data_preparation/1-data_preparation.ipynb
+        - file: src/project_akhir/4-modelling/1-modeling.ipynb
+        - file: src/project_akhir/5-evaluation/1-evaluation.ipynb
+        - file: src/project_akhir/6-deploy/1-deployment.ipynb
 
   # github:
   # To autogenerate a Table of Contents, run "jupyter book init --write-toc"

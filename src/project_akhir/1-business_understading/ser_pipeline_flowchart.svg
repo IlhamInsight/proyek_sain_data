@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 720" width="100%" height="100%" style="background:#0b0f19; font-family:'Segoe UI', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <linearGradient id="grad-title" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="card-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <!-- Main Title -->
+  <text x="570" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="url(#grad-title)" letter-spacing="0.8">
+    DIAGRAM ALUR TEKNIS 6 TAHAPAN SPEECH EMOTION RECOGNITION (CRISP-DM)
+  </text>
+  <text x="570" y="66" text-anchor="middle" font-size="13.5" fill="#94a3b8">
+    Arsitektur Tunggal: Attention-based CRNN (2D-CNN + Bi-LSTM + Multi-Head Self-Attention) pada Dataset RAVDESS
+  </text>
+
+  <!-- ==================== ROW 1: TAHAP 1, 2, 3 ==================== -->
+
+  <!-- STAGE 1: BUSINESS & DATA UNDERSTANDING -->
+  <g transform="translate(30, 90)" filter="url(#shadow)">
+    <rect width="330" height="270" rx="12" fill="url(#card-bg)" stroke="#38bdf8" stroke-width="2"/>
+    <rect width="330" height="42" rx="12" fill="#0284c7" fill-opacity="0.3"/>
+    <circle cx="28" cy="21" r="13" fill="#0284c7"/>
+    <text x="28" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">1</text>
+    <text x="52" y="26" font-size="13.5" font-weight="bold" fill="#38bdf8">BUSINESS &amp; DATA UNDERSTANDING</text>
+
+    <!-- Sub-boxes -->
+    <rect x="16" y="56" width="298" height="44" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1.2"/>
+    <text x="28" y="75" font-size="12" font-weight="600" fill="#f8fafc">Input Raw Audio RAVDESS</text>
+    <text x="28" y="92" font-size="11" fill="#94a3b8">1.440 File Audio (.wav) • 24 Aktor (12 Pria, 12 Wanita)</text>
+
+    <rect x="16" y="110" width="298" height="44" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1.2"/>
+    <text x="28" y="129" font-size="12" font-weight="600" fill="#f8fafc">Parsing 7-Segmen Metadata</text>
+    <text x="28" y="146" font-size="11" fill="#94a3b8">8 Kelas Emosi • Intensitas (Normal/Strong) • Gender</text>
+
+    <rect x="16" y="164" width="298" height="44" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1.2"/>
+    <text x="28" y="183" font-size="12" font-weight="600" fill="#f8fafc">Audit Distribusi &amp; Karakteristik Sinyal</text>
+    <text x="28" y="200" font-size="11" fill="#94a3b8">Imbalance Kelas Neutral (96 vs 192 file) • EDA Waveform</text>
+
+    <rect x="16" y="220" width="298" height="34" rx="6" fill="#082f49" stroke="#0284c7" stroke-width="1"/>
+    <text x="165" y="241" text-anchor="middle" font-size="11.5" font-weight="600" fill="#7dd3fc">Output: Metadata Terstruktur &amp; Profil Akustik</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="360" y1="225" x2="395" y2="225" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5,3"/>
+  <polygon points="403,225 391,218 391,232" fill="#38bdf8"/>
+
+  <!-- STAGE 2: DATA PREPARATION & PREPROCESSING -->
+  <g transform="translate(405, 90)" filter="url(#shadow)">
+    <rect width="330" height="270" rx="12" fill="url(#card-bg)" stroke="#06b6d4" stroke-width="2"/>
+    <rect width="330" height="42" rx="12" fill="#0891b2" fill-opacity="0.3"/>
+    <circle cx="28" cy="21" r="13" fill="#0891b2"/>
+    <text x="28" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">2</text>
+    <text x="52" y="26" font-size="13.5" font-weight="bold" fill="#22d3ee">DATA PREPARATION &amp; BALANCING</text>
+
+    <!-- Sub-boxes -->
+    <rect x="16" y="56" width="298" height="44" rx="6" fill="#0f172a" stroke="#164e63" stroke-width="1.2"/>
+    <text x="28" y="75" font-size="12" font-weight="600" fill="#f8fafc">Pembersihan &amp; Standardisasi Sinyal</text>
+    <text x="28" y="92" font-size="11" fill="#94a3b8">Mono 16 kHz • Pre-Emphasis • Trim 25dB • Durasi 3.0s</text>
+
+    <rect x="16" y="110" width="298" height="44" rx="6" fill="#0f172a" stroke="#164e63" stroke-width="1.2"/>
+    <text x="28" y="129" font-size="12" font-weight="600" fill="#f8fafc">Speaker-Independent Split (Bebas Leakage)</text>
+    <text x="28" y="146" font-size="11" fill="#94a3b8">5-Fold GroupKFold by Actor ID (Seimbang Pria &amp; Wanita)</text>
+
+    <rect x="16" y="164" width="298" height="44" rx="6" fill="#0f172a" stroke="#164e63" stroke-width="1.2"/>
+    <text x="28" y="183" font-size="12" font-weight="600" fill="#f8fafc">Hybrid Class Balancing &amp; Normalisasi</text>
+    <text x="28" y="200" font-size="11" fill="#94a3b8">2x Targeted Aug (Neutral) + Class Weight + Z-Score</text>
+
+    <rect x="16" y="220" width="298" height="34" rx="6" fill="#083344" stroke="#06b6d4" stroke-width="1"/>
+    <text x="165" y="241" text-anchor="middle" font-size="11.5" font-weight="600" fill="#67e8f9">Output: Sinyal Bersih 48.000 Sampel &amp; Seimbang</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="735" y1="225" x2="770" y2="225" stroke="#06b6d4" stroke-width="3" stroke-dasharray="5,3"/>
+  <polygon points="778,225 766,218 766,232" fill="#06b6d4"/>
+
+  <!-- STAGE 3: ACOUSTIC FEATURE EXTRACTION -->
+  <g transform="translate(780, 90)" filter="url(#shadow)">
+    <rect width="330" height="270" rx="12" fill="url(#card-bg)" stroke="#10b981" stroke-width="2"/>
+    <rect width="330" height="42" rx="12" fill="#059669" fill-opacity="0.3"/>
+    <circle cx="28" cy="21" r="13" fill="#059669"/>
+    <text x="28" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">3</text>
+    <text x="52" y="26" font-size="13.5" font-weight="bold" fill="#34d399">ACOUSTIC FEATURE EXTRACTION</text>
+
+    <!-- Sub-boxes -->
+    <rect x="16" y="56" width="298" height="44" rx="6" fill="#0f172a" stroke="#064e3b" stroke-width="1.2"/>
+    <text x="28" y="75" font-size="12" font-weight="600" fill="#f8fafc">Representasi Waktu-Frekuensi (STFT)</text>
+    <text x="28" y="92" font-size="11" fill="#94a3b8">Log Mel-Spectrogram (128 Mel Bins × 94 Time Frames)</text>
+
+    <rect x="16" y="110" width="298" height="44" rx="6" fill="#0f172a" stroke="#064e3b" stroke-width="1.2"/>
+    <text x="28" y="129" font-size="12" font-weight="600" fill="#f8fafc">Fitur Cepstral &amp; Harmonik Nada</text>
+    <text x="28" y="146" font-size="11" fill="#94a3b8">MFCC (40 Koefisien + Delta + Delta-Delta) &amp; Chroma STFT</text>
+
+    <rect x="16" y="164" width="298" height="44" rx="6" fill="#0f172a" stroke="#064e3b" stroke-width="1.2"/>
+    <text x="28" y="183" font-size="12" font-weight="600" fill="#f8fafc">Fitur Energi &amp; Bentuk Spektral</text>
+    <text x="28" y="200" font-size="11" fill="#94a3b8">RMS Energy, Zero-Crossing Rate, Centroid &amp; Rolloff</text>
+
+    <rect x="16" y="220" width="298" height="34" rx="6" fill="#022c22" stroke="#10b981" stroke-width="1"/>
+    <text x="165" y="241" text-anchor="middle" font-size="11.5" font-weight="600" fill="#6ee7b7">Output: Tensor Multi-Fitur Akustik Terintegrasi</text>
+  </g>
+
+  <!-- Connector Arrow from Stage 3 (Row 1 Right) to Stage 4 (Row 2 Left) -->
+  <path d="M 945 360 L 945 382 L 195 382 L 195 400" fill="none" stroke="#818cf8" stroke-width="3" stroke-dasharray="6,4"/>
+  <polygon points="195,408 188,396 202,396" fill="#818cf8"/>
+
+  <!-- ==================== ROW 2: TAHAP 4, 5, 6 ==================== -->
+
+  <!-- STAGE 4: DEEP LEARNING MODELING & TUNING -->
+  <g transform="translate(30, 410)" filter="url(#shadow)">
+    <rect width="330" height="270" rx="12" fill="url(#card-bg)" stroke="#818cf8" stroke-width="2"/>
+    <rect width="330" height="42" rx="12" fill="#4f46e5" fill-opacity="0.3"/>
+    <circle cx="28" cy="21" r="13" fill="#4f46e5"/>
+    <text x="28" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">4</text>
+    <text x="52" y="26" font-size="13.5" font-weight="bold" fill="#a5b4fc">MODELING &amp; HYPERPARAMETER</text>
+
+    <!-- Sub-boxes -->
+    <rect x="16" y="56" width="298" height="44" rx="6" fill="#0f172a" stroke="#312e81" stroke-width="1.2"/>
+    <text x="28" y="75" font-size="12" font-weight="600" fill="#f8fafc">Arsitektur Attention-based CRNN</text>
+    <text x="28" y="92" font-size="11" fill="#94a3b8">2D-CNN (4 Blok) → Bi-LSTM → Multi-Head Self-Attention</text>
+
+    <rect x="16" y="110" width="298" height="44" rx="6" fill="#0f172a" stroke="#312e81" stroke-width="1.2"/>
+    <text x="28" y="129" font-size="12" font-weight="600" fill="#f8fafc">Optimasi Hiperparameter (Optuna TPE)</text>
+    <text x="28" y="146" font-size="11" fill="#94a3b8">Tuning LR, Weight Decay, Filter, Hidden Size &amp; Dropout</text>
+
+    <rect x="16" y="164" width="298" height="44" rx="6" fill="#0f172a" stroke="#312e81" stroke-width="1.2"/>
+    <text x="28" y="183" font-size="12" font-weight="600" fill="#f8fafc">Regularisasi &amp; Stabilitas Pelatihan</text>
+    <text x="28" y="200" font-size="11" fill="#94a3b8">Cosine Annealing LR • Early Stopping • Grad Clip (1.0)</text>
+
+    <rect x="16" y="220" width="298" height="34" rx="6" fill="#1e1b4b" stroke="#818cf8" stroke-width="1"/>
+    <text x="165" y="241" text-anchor="middle" font-size="11.5" font-weight="600" fill="#c7d2fe">Output: Model CRNN Optimal (Best Checkpoint)</text>
+  </g>
+
+  <!-- Arrow 4 -> 5 -->
+  <line x1="360" y1="545" x2="395" y2="545" stroke="#818cf8" stroke-width="3" stroke-dasharray="5,3"/>
+  <polygon points="403,545 391,538 391,552" fill="#818cf8"/>
+
+  <!-- STAGE 5: EVALUATION & VALIDATION -->
+  <g transform="translate(405, 410)" filter="url(#shadow)">
+    <rect width="330" height="270" rx="12" fill="url(#card-bg)" stroke="#f59e0b" stroke-width="2"/>
+    <rect width="330" height="42" rx="12" fill="#d97706" fill-opacity="0.3"/>
+    <circle cx="28" cy="21" r="13" fill="#d97706"/>
+    <text x="28" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">5</text>
+    <text x="52" y="26" font-size="13.5" font-weight="bold" fill="#fcd34d">EVALUATION &amp; VALIDATION</text>
+
+    <!-- Sub-boxes -->
+    <rect x="16" y="56" width="298" height="44" rx="6" fill="#0f172a" stroke="#78350f" stroke-width="1.2"/>
+    <text x="28" y="75" font-size="12" font-weight="600" fill="#f8fafc">Metrik Per-Kelas &amp; Global (Standar SER)</text>
+    <text x="28" y="92" font-size="11" fill="#94a3b8">Accuracy (WAR) • Macro Recall (UAR) • Precision • F1</text>
+
+    <rect x="16" y="110" width="298" height="44" rx="6" fill="#0f172a" stroke="#78350f" stroke-width="1.2"/>
+    <text x="28" y="129" font-size="12" font-weight="600" fill="#f8fafc">Pengujian Keandalan Statistik</text>
+    <text x="28" y="146" font-size="11" fill="#94a3b8">Cohen's Kappa (&gt; 0.80) &amp; Multi-Class ROC-AUC (OvR)</text>
+
+    <rect x="16" y="164" width="298" height="44" rx="6" fill="#0f172a" stroke="#78350f" stroke-width="1.2"/>
+    <text x="28" y="183" font-size="12" font-weight="600" fill="#f8fafc">Analisis Diagnostik &amp; Error</text>
+    <text x="28" y="200" font-size="11" fill="#94a3b8">Confusion Matrix 8×8 • Gender Bias • Normal vs Strong</text>
+
+    <rect x="16" y="220" width="298" height="34" rx="6" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+    <text x="165" y="241" text-anchor="middle" font-size="11.5" font-weight="600" fill="#fde68a">Target: WAR ≥ 85%, Precision ≥ 85%, UAR ≥ 84%</text>
+  </g>
+
+  <!-- Arrow 5 -> 6 -->
+  <line x1="735" y1="545" x2="770" y2="545" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5,3"/>
+  <polygon points="778,545 766,538 766,552" fill="#f59e0b"/>
+
+  <!-- STAGE 6: DEPLOYMENT & SERVING -->
+  <g transform="translate(780, 410)" filter="url(#shadow)">
+    <rect width="330" height="270" rx="12" fill="url(#card-bg)" stroke="#ec4899" stroke-width="2"/>
+    <rect width="330" height="42" rx="12" fill="#db2777" fill-opacity="0.3"/>
+    <circle cx="28" cy="21" r="13" fill="#db2777"/>
+    <text x="28" y="26" text-anchor="middle" font-size="13" font-weight="bold" fill="#ffffff">6</text>
+    <text x="52" y="26" font-size="13.5" font-weight="bold" fill="#f472b6">DEPLOYMENT &amp; SERVING</text>
+
+    <!-- Sub-boxes -->
+    <rect x="16" y="56" width="298" height="44" rx="6" fill="#0f172a" stroke="#831843" stroke-width="1.2"/>
+    <text x="28" y="75" font-size="12" font-weight="600" fill="#f8fafc">Optimasi &amp; Eksportasi Model</text>
+    <text x="28" y="92" font-size="11" fill="#94a3b8">ONNX Runtime / TorchScript FP16 (Inferensi &lt; 40 ms)</text>
+
+    <rect x="16" y="110" width="298" height="44" rx="6" fill="#0f172a" stroke="#831843" stroke-width="1.2"/>
+    <text x="28" y="129" font-size="12" font-weight="600" fill="#f8fafc">Backend REST API Service</text>
+    <text x="28" y="146" font-size="11" fill="#94a3b8">FastAPI Endpoint: POST /api/v1/predict-emotion</text>
+
+    <rect x="16" y="164" width="298" height="44" rx="6" fill="#0f172a" stroke="#831843" stroke-width="1.2"/>
+    <text x="28" y="183" font-size="12" font-weight="600" fill="#f8fafc">Dashboard Interaktif (Streamlit)</text>
+    <text x="28" y="200" font-size="11" fill="#94a3b8">Live Mic Recorder • Spektrogram • Grafik 8 Probabilitas</text>
+
+    <rect x="16" y="220" width="298" height="34" rx="6" fill="#500724" stroke="#ec4899" stroke-width="1"/>
+    <text x="165" y="241" text-anchor="middle" font-size="11.5" font-weight="600" fill="#fbcfe8">Output: Aplikasi Web SER Siap Pakai (Real-Time)</text>
+  </g>
+</svg>

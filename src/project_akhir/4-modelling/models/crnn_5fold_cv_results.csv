@@ -1,0 +1,6 @@
+Fold,Jumlah Aktor Uji,Sampel Uji,Accuracy / WAR (%),Macro Precision (%),Macro Recall / UAR (%),Macro F1-Score (%)
+Fold 0,5,300,96.33,96.43,96.56,96.28
+Fold 1,5,300,97.0,97.41,97.19,97.18
+Fold 2,5,300,93.67,93.83,94.06,93.82
+Fold 3,5,300,93.67,94.01,94.06,93.84
+Fold 4,4,240,95.0,94.95,95.31,95.09
