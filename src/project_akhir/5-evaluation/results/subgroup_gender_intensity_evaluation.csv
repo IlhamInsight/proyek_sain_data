@@ -1,5 +1,5 @@
-Dimensi Evaluasi,Sub-Kelompok,Jumlah Sampel,Accuracy / WAR (%),Macro Precision (%),Macro Recall / UAR (%),Macro F1-Score (%)
-Gender Penutur,Female,720,95.69,95.87,95.96,95.72
-Gender Penutur,Male,720,94.58,94.82,94.92,94.78
-Intensitas Emosi,Normal,768,95.57,95.55,95.57,95.54
-Intensitas Emosi,Strong,672,94.64,83.1,82.81,82.9
+Dimensi Evaluasi,Sub-Kelompok,Jumlah Sampel,Sampel Tepat,Accuracy / WAR (%),Macro Precision (%),Macro Recall / UAR (%),Macro F1-Score (%)
+Gender Penutur,Female,137,110 / 137,80.29,79.62,80.41,79.76
+Gender Penutur,Male,151,121 / 151,80.13,80.58,80.01,79.56
+Intensitas Emosi,Normal,159,125 / 159,78.62,79.59,78.11,78.31
+Intensitas Emosi,Strong,129,106 / 129,82.17,81.13,81.89,80.94

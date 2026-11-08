@@ -1,10 +1,9 @@
-Metrik Evaluasi Ilmiah,Target Business Understanding,Validation Set (120 Sampel),Testing Set (240 Sampel Baru),5-Fold Speaker-Independent CV (1.440 Sampel),Status Pencapaian
-WAR / Overall Accuracy (%),≥ 85.00%,92.5,90.42,95.14,TERCAPAI (MELAMPAUI TARGET)
-UAR / Macro Recall (%),≥ 84.00%,92.97,91.02,95.44,TERCAPAI (MELAMPAUI TARGET)
-Macro Precision (%),≥ 85.00%,93.08,90.73,95.19,TERCAPAI (MELAMPAUI TARGET)
-Weighted Precision (%),≥ 85.00%,92.62,90.5,95.14,TERCAPAI (MELAMPAUI TARGET)
-Macro F1-Score (%),≥ 84.00%,92.91,90.49,95.28,TERCAPAI (MELAMPAUI TARGET)
-Weighted F1-Score (%),≥ 85.00%,92.44,90.06,95.1,TERCAPAI (MELAMPAUI TARGET)
-Multi-Class ROC-AUC OvR (%),≥ 95.00%,98.53,99.21,99.64,TERCAPAI (MELAMPAUI TARGET)
-Cohen's Kappa (κ),> 0.8000 (Almost Perfect),0.9139,0.89,0.9442,TERCAPAI (MELAMPAUI TARGET)
-Matthews Corr Coeff (MCC),> 0.8000 (Strong Agreement),0.9143,0.8912,0.9443,TERCAPAI (MELAMPAUI TARGET)
+Metrik Evaluasi Klasifikasi,Testing Set (288 Sampel Uji),5-Fold Cross-Validation (1.440 Sampel)
+Total Sampel Benar,231 / 288 sampel,1168 / 1440 sampel
+Akurasi Klasifikasi (Accuracy),80.21%,81.11%
+Rata-rata Presisi (Macro Precision),79.93%,80.47%
+Rata-rata Recall (Macro Recall),79.79%,80.86%
+Rata-rata F1-Score (Macro F1),79.56%,80.61%
+Presisi Terbobot (Weighted Precision),81.30%,81.18%
+Recall Terbobot (Weighted Recall),80.21%,81.11%
+F1-Score Terbobot (Weighted F1),80.48%,81.10%

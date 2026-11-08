@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 460" width="100%" height="100%" style="background:#0b0f19; font-family:'Segoe UI', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <linearGradient id="grad-title-deploy" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="card-dep-1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadow-dep" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="570" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="url(#grad-title-deploy)" letter-spacing="0.8">
+    ARSITEKTUR DEPLOYMENT AFFECTIVE COMPUTING: DUA SKENARIO PENGUJIAN
+  </text>
+  <text x="570" y="62" text-anchor="middle" font-size="12.5" fill="#94a3b8">
+    Mode 1 (Benchmark Test Set Dataset) &amp; Mode 2 (Audio Dialog Film &amp; Live Mic Input)
+  </text>
+
+  <!-- ==================== 2 INPUT MODES ==================== -->
+
+  <!-- Mode 1 Card -->
+  <g transform="translate(40, 85)" filter="url(#shadow-dep)">
+    <rect width="500" height="150" rx="10" fill="url(#card-dep-1)" stroke="#38bdf8" stroke-width="1.8"/>
+    <rect width="500" height="36" rx="10" fill="#0284c7" fill-opacity="0.3"/>
+    <text x="250" y="24" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#38bdf8">
+      MODE 1: PENGUJIAN BENCHMARK TEST SET DATASET
+    </text>
+    <text x="25" y="60" font-size="11" font-weight="600" fill="#f8fafc">Verifikasi Ilmiah Speaker-Independent (240 Sampel Uji Murni)</text>
+    <text x="25" y="78" font-size="10.5" fill="#94a3b8">• Menguji aktor baru yang tidak pernah dilihat model (Actor 21-24: 2 Pria, 2 Wanita)</text>
+    <text x="25" y="96" font-size="10.5" fill="#94a3b8">• Membandingkan prediksi terhadap ground-truth psikometri Livingstone &amp; Russo (2018)</text>
+    <text x="25" y="114" font-size="10.5" fill="#94a3b8">• Evaluasi kuantitatif presisi, recall per-kelas, akurasi (90% - 99%), dan F1-score</text>
+    <rect x="25" y="123" width="450" height="18" rx="4" fill="#082f49"/>
+    <text x="250" y="136" text-anchor="middle" font-size="9.5" font-weight="600" fill="#7dd3fc">Tolok Ukur Keandalan Ilmiah &amp; Komparasi Kinerja Akademik</text>
+  </g>
+
+  <!-- Mode 2 Card -->
+  <g transform="translate(600, 85)" filter="url(#shadow-dep)">
+    <rect width="500" height="150" rx="10" fill="url(#card-dep-1)" stroke="#ec4899" stroke-width="1.8"/>
+    <rect width="500" height="36" rx="10" fill="#db2777" fill-opacity="0.3"/>
+    <text x="250" y="24" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#f472b6">
+      MODE 2: PENGUJIAN AUDIO KLIP FILM &amp; LIVE MIC
+    </text>
+    <text x="25" y="60" font-size="11" font-weight="600" fill="#f8fafc">Pengujian In-The-Wild &amp; Generalisasi Dialog Dramatis</text>
+    <text x="25" y="78" font-size="10.5" fill="#94a3b8">• Potongan suara dialog adegan film (kemarahan, kepanikan, kesedihan, kegembiraan)</text>
+    <text x="25" y="96" font-size="10.5" fill="#94a3b8">• Perekaman suara langsung pengguna melalui mikrofon peramban (Live Audio Recorder)</text>
+    <text x="25" y="114" font-size="10.5" fill="#94a3b8">• Normalisasi Gain-Invariant Utterance-CMVN untuk menetralkan noise &amp; mikrofon</text>
+    <rect x="25" y="123" width="450" height="18" rx="4" fill="#500724"/>
+    <text x="250" y="136" text-anchor="middle" font-size="9.5" font-weight="600" fill="#fbcfe8">Uji Daya Tahan &amp; Kemampuan Empati Komputasi Afektif Real-World</text>
+  </g>
+
+  <!-- Central Converging Arrows -->
+  <path d="M 290 235 L 290 260 L 550 260 L 550 275" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4,2"/>
+  <polygon points="550,283 544,271 556,271" fill="#38bdf8"/>
+
+  <path d="M 850 235 L 850 260 L 590 260 L 590 275" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-dasharray="4,2"/>
+  <polygon points="590,283 584,271 596,271" fill="#ec4899"/>
+
+  <!-- ==================== MIDDLE: UNIFIED FP16 ENGINE ==================== -->
+  <g transform="translate(190, 285)" filter="url(#shadow-dep)">
+    <rect width="760" height="48" rx="8" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5"/>
+    <text x="380" y="22" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c7d2fe">
+      PIPELINE EKSTRAKSI FITUR REAL-TIME (264 KANAL x 94 FRAMES) &amp; ENGINE ATTENTION-CRNN (FP16)
+    </text>
+    <text x="380" y="38" text-anchor="middle" font-size="10" fill="#94a3b8">
+      Mono 16 kHz • Trim 25dB • Pre-Emphasis • Durasi 3.0s • Z-Score Standar • Inferensi &lt; 30 ms
+    </text>
+  </g>
+
+  <!-- Down Arrow -->
+  <line x1="570" y1="333" x2="570" y2="355" stroke="#818cf8" stroke-width="2.5"/>
+  <polygon points="570,363 564,351 576,351" fill="#818cf8"/>
+
+  <!-- ==================== BOTTOM: DASHBOARD UI & API ==================== -->
+  <g transform="translate(40, 365)" filter="url(#shadow-dep)">
+    <rect width="1060" height="75" rx="10" fill="#111827" stroke="#374151" stroke-width="1.5"/>
+    
+    <text x="530" y="22" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">
+      ANTARMUKA INTERAKTIF STREAMLIT &amp; REST API FASTAPI
+    </text>
+
+    <!-- 4 Dashboard Feature Badges -->
+    <rect x="20" y="32" width="240" height="34" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="1"/>
+    <text x="140" y="48" text-anchor="middle" font-size="10" font-weight="600" fill="#38bdf8">1. Deteksi Emosi Terpilih</text>
+    <text x="140" y="60" text-anchor="middle" font-size="9" fill="#94a3b8">Skor Keyakinan Probabilitas (86%-95%)</text>
+
+    <rect x="280" y="32" width="240" height="34" rx="6" fill="#0f172a" stroke="#818cf8" stroke-width="1"/>
+    <text x="400" y="48" text-anchor="middle" font-size="10" font-weight="600" fill="#818cf8">2. Peta 2D Sirkumpleks Russell</text>
+    <text x="400" y="60" text-anchor="middle" font-size="9" fill="#94a3b8">Koordinat Visual Sumbu Arousal-Valence</text>
+
+    <rect x="540" y="32" width="240" height="34" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1"/>
+    <text x="660" y="48" text-anchor="middle" font-size="10" font-weight="600" fill="#34d399">3. Indikator Fisiologis</text>
+    <text x="660" y="60" text-anchor="middle" font-size="9" fill="#94a3b8">Pitch F0 (Hz), Tilt, ZCR, &amp; RMS Energi</text>
+
+    <rect x="800" y="32" width="240" height="34" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+    <text x="920" y="48" text-anchor="middle" font-size="10" font-weight="600" fill="#fbbf24">4. REST API Endpoint</text>
+    <text x="920" y="60" text-anchor="middle" font-size="9" fill="#94a3b8">POST /api/v1/predict-emotion (JSON)</text>
+  </g>
+</svg>
+

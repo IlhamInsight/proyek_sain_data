@@ -1,0 +1,7 @@
+Subset Evaluasi,Deskripsi Sampel,Sampel Benar (TP),Sampel Salah (FP+FN),Total Sampel (N),Rumus Pembuktian (TP / N),Total Akurasi (%),Status Validasi
+Testing Set (Top-1 Standar),288 Audio Uji Murni (Aktor 21-24 Unseen),231,57,288,231 / 288,80.21%,TERBUKTI (Bebas Leakage)
+Testing Set (Top-2 Diagnostik),Emosi tepat masuk dalam 2 kandidat teratas,259,29,288,259 / 288,89.93%,TERBUKTI (Diagnostik Klinis)
+Testing Set (Top-3 Resolusi),Emosi tepat masuk dalam 3 kandidat teratas,273,15,288,273 / 288,94.79%,TERBUKTI (Resolusi Tinggi)
+FastAPI Master Hybrid Model,845 Fitur CMVN Invarian (Model Produksi),229,59,288,229 / 288,79.51%,TERBUKTI (Model Produksi)
+5-Fold Cross-Validation,1.440 Audio Lengkap (Out-of-Fold 24 Aktor),1168,272,1440,1168 / 1440,81.11%,TERBUKTI (Stabil Lintas Aktor)
+Training Set (Data Latih),1.152 Audio Latih (Aktor 01-20),1152,0,1152,1152 / 1152,100.00%,TERBUKTI (Konvergensi Fitur)
