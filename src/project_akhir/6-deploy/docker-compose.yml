@@ -8,13 +8,12 @@ services:
     container_name: ser-emotion-classifier
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8015:8015"
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8015/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-

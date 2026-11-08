@@ -8,11 +8,11 @@ penggunaan:
   1. menjalankan server lokal:
      python src/project_akhir/6-deploy/app.py
      atau:
-     uvicorn app:app --host 0.0.0.0 --port 8000 --app-dir src/project_akhir/6-deploy
+     uvicorn app:app --host 0.0.0.0 --port 8015 --app-dir src/project_akhir/6-deploy
 
   2. akses di browser:
-     - antarmuka web interaktif : http://localhost:8000/
-     - dokumentasi swagger api  : http://localhost:8000/docs
+     - antarmuka web interaktif : http://localhost:8015/
+     - dokumentasi swagger api  : http://localhost:8015/docs
 """
 
 import io
@@ -1995,7 +1995,7 @@ async def serve_web_interface():
 # ==============================================================================
 
 if __name__ == "__main__":
-    port = 8000
+    port = 8015
     for i, arg in enumerate(sys.argv):
         if arg == "--port" and i + 1 < len(sys.argv):
             port = int(sys.argv[i + 1])

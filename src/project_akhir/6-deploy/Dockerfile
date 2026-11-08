@@ -25,12 +25,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . /app/
 
 # port microservice
-EXPOSE 8000
+EXPOSE 8015
 
 # uji kesehatan kontainer
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:8015/health || exit 1
 
 # jalankan server uvicorn berkinerja tinggi
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
-
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8015"]
