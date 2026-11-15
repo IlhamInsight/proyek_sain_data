@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 440" width="100%" height="100%" style="background:#0b0f19; font-family:'Segoe UI', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <linearGradient id="grad-title-hybrid" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <linearGradient id="layer-bg-h" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadow-hybrid" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="570" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="url(#grad-title-hybrid)" letter-spacing="0.8">
+    ARSITEKTUR PRODUKSI: MASTER HYBRID SOFT-VOTING ENSEMBLE
+  </text>
+  <text x="570" y="58" text-anchor="middle" font-size="12.5" fill="#94a3b8">
+    845 Fitur Akustik Invarian CMVN + Dual Estimator (RBF-SVM &amp; Deep MLP) + Soft-Voting Averaging 8 Kelas Emosi
+  </text>
+
+  <!-- Block 1: Input Features (845 Dimensi) -->
+  <g transform="translate(30, 85)" filter="url(#shadow-hybrid)">
+    <rect width="180" height="245" rx="10" fill="url(#layer-bg-h)" stroke="#38bdf8" stroke-width="1.8"/>
+    <rect width="180" height="36" rx="10" fill="#0284c7" fill-opacity="0.3"/>
+    <text x="90" y="24" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#38bdf8">MASTER FITUR AKUSTIK</text>
+    <text x="90" y="72" text-anchor="middle" font-size="16" font-weight="800" fill="#f8fafc">845 Dimensi</text>
+    <text x="90" y="92" text-anchor="middle" font-size="10" fill="#94a3b8">Representasi Invarian Terpadu</text>
+    
+    <rect x="12" y="108" width="156" height="110" rx="6" fill="#0f172a" stroke="#1e3a5f" stroke-width="1"/>
+    <text x="90" y="128" text-anchor="middle" font-size="9.5" fill="#7dd3fc">528 Spektro-Temporal</text>
+    <text x="90" y="146" text-anchor="middle" font-size="9.5" fill="#7dd3fc">71 Kontur Prosodi &amp; F0</text>
+    <text x="90" y="164" text-anchor="middle" font-size="9.5" fill="#7dd3fc">97 Dinamika Ritme</text>
+    <text x="90" y="184" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#34d399">165 CMVN Robust Normal</text>
+    <text x="90" y="202" text-anchor="middle" font-size="8.5" fill="#94a3b8">Tahan Durasi &amp; Gain</text>
+  </g>
+
+  <!-- Arrow 1 to Scaler -->
+  <path d="M 215 207 L 245 207" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4,3"/>
+  <polygon points="245,203 253,207 245,211" fill="#38bdf8"/>
+
+  <!-- Block 2: RobustScaler Normalization -->
+  <g transform="translate(255, 125)" filter="url(#shadow-hybrid)">
+    <rect width="130" height="165" rx="10" fill="url(#layer-bg-h)" stroke="#6366f1" stroke-width="1.8"/>
+    <rect width="130" height="34" rx="10" fill="#4f46e5" fill-opacity="0.3"/>
+    <text x="65" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#a5b4fc">NORMALISASI</text>
+    <text x="65" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#f8fafc">RobustScaler</text>
+    <text x="65" y="85" text-anchor="middle" font-size="9.5" fill="#94a3b8">Quantile 5% - 95%</text>
+    <rect x="10" y="102" width="110" height="48" rx="6" fill="#0f172a" stroke="#312e81" stroke-width="1"/>
+    <text x="65" y="120" text-anchor="middle" font-size="9" fill="#c7d2fe">Outlier Clipping</text>
+    <text x="65" y="136" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#34d399">[-4.0, +4.0]</text>
+  </g>
+
+  <!-- Fork Arrows from Scaler to Dual Models -->
+  <!-- Upper fork to SVM -->
+  <path d="M 390 175 L 425 175 L 425 145 L 450 145" stroke="#818cf8" stroke-width="2.2"/>
+  <polygon points="450,141 458,145 450,149" fill="#818cf8"/>
+  <!-- Lower fork to MLP -->
+  <path d="M 390 240 L 425 240 L 425 270 L 450 270" stroke="#818cf8" stroke-width="2.2"/>
+  <polygon points="450,266 458,270 450,274" fill="#818cf8"/>
+
+  <!-- Block 3A: Model 1 - Master RBF-SVM -->
+  <g transform="translate(460, 85)" filter="url(#shadow-hybrid)">
+    <rect width="185" height="115" rx="10" fill="url(#layer-bg-h)" stroke="#0ea5e9" stroke-width="1.8"/>
+    <rect width="185" height="30" rx="10" fill="#0369a1" fill-opacity="0.3"/>
+    <text x="92" y="20" text-anchor="middle" font-size="11" font-weight="bold" fill="#38bdf8">ESTIMATOR 1: RBF-SVM</text>
+    <text x="92" y="55" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#f8fafc">Support Vector Classifier</text>
+    <text x="92" y="72" text-anchor="middle" font-size="9.5" fill="#94a3b8">Kernel RBF | C = 4.0</text>
+    <text x="92" y="90" text-anchor="middle" font-size="9.5" fill="#7dd3fc">Batas Margin Maksimum</text>
+    <text x="92" y="104" text-anchor="middle" font-size="8.5" fill="#34d399">P(y | x) Terkalibrasi Isotonic</text>
+  </g>
+
+  <!-- Block 3B: Model 2 - Deep MLP -->
+  <g transform="translate(460, 215)" filter="url(#shadow-hybrid)">
+    <rect width="185" height="115" rx="10" fill="url(#layer-bg-h)" stroke="#a855f7" stroke-width="1.8"/>
+    <rect width="185" height="30" rx="10" fill="#7e22ce" fill-opacity="0.3"/>
+    <text x="92" y="20" text-anchor="middle" font-size="11" font-weight="bold" fill="#c084fc">ESTIMATOR 2: DEEP MLP</text>
+    <text x="92" y="55" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#f8fafc">Multi-Layer Perceptron</text>
+    <text x="92" y="72" text-anchor="middle" font-size="9.5" fill="#94a3b8">Dense 256 -&gt; 128 (ReLU)</text>
+    <text x="92" y="90" text-anchor="middle" font-size="9.5" fill="#e9d5ff">Korelasi Fitur Non-Linier</text>
+    <text x="92" y="104" text-anchor="middle" font-size="8.5" fill="#34d399">Regularisasi L2 + Dropout</text>
+  </g>
+
+  <!-- Join Arrows from Dual Models to Soft Voting -->
+  <path d="M 650 145 L 685 145 L 685 185 L 705 185" stroke="#38bdf8" stroke-width="2.2"/>
+  <polygon points="705,181 713,185 705,189" fill="#38bdf8"/>
+  <path d="M 650 270 L 685 270 L 685 225 L 705 225" stroke="#a855f7" stroke-width="2.2"/>
+  <polygon points="705,221 713,225 705,229" fill="#a855f7"/>
+
+  <!-- Block 4: Soft-Voting Fusion -->
+  <g transform="translate(715, 120)" filter="url(#shadow-hybrid)">
+    <rect width="175" height="175" rx="10" fill="url(#layer-bg-h)" stroke="#ec4899" stroke-width="1.8"/>
+    <rect width="175" height="34" rx="10" fill="#db2777" fill-opacity="0.3"/>
+    <text x="87" y="22" text-anchor="middle" font-size="11" font-weight="bold" fill="#f472b6">SOFT-VOTING FUSION</text>
+    <text x="87" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#f8fafc">Weighted Averaging</text>
+    <text x="87" y="85" text-anchor="middle" font-size="9.5" fill="#94a3b8">Perataan Distribusi Probabilitas</text>
+    
+    <rect x="10" y="100" width="155" height="58" rx="6" fill="#0f172a" stroke="#831843" stroke-width="1"/>
+    <text x="87" y="122" text-anchor="middle" font-size="10" font-weight="bold" fill="#f472b6">P_final = (P_svm + P_mlp)/2</text>
+    <text x="87" y="142" text-anchor="middle" font-size="8.5" fill="#34d399">Minimasi Kesalahan Relatif</text>
+  </g>
+
+  <!-- Arrow to Output -->
+  <path d="M 895 207 L 925 207" stroke="#ec4899" stroke-width="2.5"/>
+  <polygon points="925,203 933,207 925,211" fill="#ec4899"/>
+
+  <!-- Block 5: Final Output & Russell Circumplex -->
+  <g transform="translate(935, 85)" filter="url(#shadow-hybrid)">
+    <rect width="175" height="245" rx="10" fill="url(#layer-bg-h)" stroke="#10b981" stroke-width="1.8"/>
+    <rect width="175" height="36" rx="10" fill="#059669" fill-opacity="0.3"/>
+    <text x="87" y="24" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#34d399">LUARAN AFEKTIF</text>
+    
+    <text x="87" y="68" text-anchor="middle" font-size="11" font-weight="bold" fill="#f8fafc">8 Kelas Emosi Diskrit</text>
+    <text x="87" y="88" text-anchor="middle" font-size="9" fill="#94a3b8">Neutral, Calm, Happy, Sad,</text>
+    <text x="87" y="102" text-anchor="middle" font-size="9" fill="#94a3b8">Angry, Fearful, Disgust, Surprised</text>
+    
+    <rect x="10" y="118" width="155" height="100" rx="6" fill="#0f172a" stroke="#065f46" stroke-width="1"/>
+    <text x="87" y="138" text-anchor="middle" font-size="10" font-weight="bold" fill="#34d399">HASIL EVALUASI MURNI</text>
+    <text x="87" y="156" text-anchor="middle" font-size="9.5" fill="#6ee7b7">Akurasi Top-1: 80.21%</text>
+    <text x="87" y="173" text-anchor="middle" font-size="9.5" fill="#6ee7b7">Top-2 Diagnostic: 89.93%</text>
+    <text x="87" y="190" text-anchor="middle" font-size="9.5" fill="#6ee7b7">Top-3 Resolusi: 94.79%</text>
+    <text x="87" y="206" text-anchor="middle" font-size="8.5" fill="#a7f3d0">Latensi: &lt; 80 ms (CPU)</text>
+  </g>
+
+  <!-- Bottom Banner: Dual Paradigm -->
+  <g transform="translate(30, 355)" filter="url(#shadow-hybrid)">
+    <rect width="1080" height="60" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.2"/>
+    <text x="540" y="26" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#f8fafc">
+      HARMONISASI DUA PARADIGMA: MODEL PRODUKSI ENSEMBLE TABULAR &amp; EKSPLORASI DEEP LEARNING SEKUENSIAL
+    </text>
+    <text x="540" y="46" text-anchor="middle" font-size="10" fill="#94a3b8">
+      Model Master Hybrid Ensemble bertindak sebagai motor utama inferensi real-time di FastAPI, sementara Attention-CRNN divalidasi sebagai pembanding sekuensial temporal.
+    </text>
+  </g>
+</svg>
+

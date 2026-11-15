@@ -215,20 +215,32 @@ $$\text{Total Fitur Tabular} = 264\ (\mu) + 264\ (\sigma) = \mathbf{528\text{ Fi
 
 ---
 
-### Tahap 4: Pemodelan Deep Learning Tunggal (Attention-based CRNN)
+### Tahap 4: Pemodelan Afektif (Master Hybrid Ensemble & Eksplorasi Deep Learning)
 
-Alih-alih menggunakan banyak model yang saling bertentangan, proyek ini mengadopsi **arsitektur tunggal berkinerja tinggi** yang dirancang khusus untuk menangani sinyal audio wicara pada kalimat identik: **Attention-based CRNN (2D-CNN Backbone + Bi-LSTM + Multi-Head Self-Attention + Dense Classifier)**.
+Tahap pemodelan mengadopsi pendekatan dua pilar komplementer untuk mencapai performa klasifikasi emosi tertinggi dan daya tahan (*robustness*) optimal di lingkungan produksi:
 
-![Arsitektur Model Tunggal Attention-CRNN](attention_crnn_architecture.svg)
-*Gambar 4.1: Diagram Alur Arsitektur Model Tunggal Attention-based CRNN (2D-CNN + Bi-LSTM + Multi-Head Self-Attention).*
+#### 1. Arsitektur Produksi Utama: Master Hybrid Soft-Voting Ensemble (RBF-SVM + Deep MLP)
+Untuk melayani inferensi waktu-nyata di lingkungan deployment FastAPI, proyek ini mengimplementasikan model **Master Hybrid Soft-Voting Ensemble** yang menggabungkan dua estimator dengan karakteristik geometri saling melengkapi:
+* **Estimator 1 (Master RBF-SVM):** Menggunakan *Radial Basis Function Support Vector Machine* ($C=4.0$) dengan kalibrasi probabilitas Isotonic. Sangat presisi dalam menarik bidang pemisah margin maksimum (*maximum-margin hyperplane*) di antara fitur berdimensi tinggi, khususnya dalam membedakan kontras emosi energi tinggi vs energi rendah.
+* **Estimator 2 (Deep Multi-Layer Perceptron / MLP):** Jaringan saraf tiruan berkedalaman 2 lapis tersembunyi (256 dan 128 neuron, aktivasi ReLU, regularisasi L2 $\alpha=0.05$) untuk menangkap interaksi korelasi non-linier yang halus antar-fitur akustik.
+* **Mekanisme Soft-Voting Fusion:** Menggabungkan probabilitas terkalibrasi dari kedua model melalui perataan probabilitas:
+  $$P_{\text{final}}(y = k \mid \mathbf{x}) = \frac{P_{\text{SVM}}(y = k \mid \mathbf{x}) + P_{\text{MLP}}(y = k \mid \mathbf{x})}{2}$$
+  Pendekatan ensemble ini secara signifikan memangkas tingkat kesalahan relatif (*misclassification variance*) dan menjaga kestabilan prediksi saat menerima rekaman suara baru di luar dataset (bebas dari fenomena kolaps emosi).
 
-#### 1. Keunggulan Arsitektur Attention-CRNN pada Dataset RAVDESS
-* **Mengatasi Kesamaan Kalimat (*Prosodic Disentanglement*):** Karena teks kalimat identik, 2D-CNN mengekstrak tekstur lokal spektrogram sementara Bi-LSTM mengekstrak dinamika kontur intonasi dari awal hingga akhir kalimat.
-* **Efisiensi Parameter & Anti-Overfitting:** CRNN memiliki *inductive bias* spasial dan temporal yang kuat, sehingga mampu mencapai konvergensi optimal pada ribuan sampel tanpa mengalami *overfitting* ekstrem seperti pada model Transformer masif (*Wav2Vec 2.0 / Conformer*).
-* **Self-Attention untuk Penekanan Emosi:** Menghitung matriks atensi (*Scaled Dot-Product Attention*) untuk memberikan bobot terbesar pada suku kata atau detik tempat puncak emosi terjadi:
+![Arsitektur Master Hybrid Ensemble](master_hybrid_architecture.svg)
+*Gambar 4.1: Diagram Alur Arsitektur Model Produksi: Master Hybrid Soft-Voting Ensemble (RBF-SVM + Deep MLP) dengan 845 Fitur Akustik Invarian CMVN.*
+
+#### 2. Arsitektur Eksplorasi Sekuensial: Attention-based CRNN
+Sebagai pembanding ilmiah (*benchmark comparison*), proyek ini juga mengeksplorasi arsitektur deep learning sekuensial **Attention-based CRNN (2D-CNN Backbone + 2-Layer Bi-LSTM + Multi-Head Self-Attention + Softmax 8 Kelas)** pada tensor waktu-frekuensi ($264 \times 94$):
+* **2D-CNN Spasial:** Mengekstrak pola tekstur lokal pada spektrogram frekuensi.
+* **Bidirectional LSTM:** Menangkap dependensi waktu dan alur intonasi dari awal hingga akhir kalimat.
+* **Multi-Head Self-Attention:** Menghitung matriks atensi (*Scaled Dot-Product Attention*) untuk memberikan bobot terbesar pada suku kata tempat puncak emosi meledak:
   $$\text{Attention}(Q, K, V) = \operatorname{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
-#### 2. Optimasi Hiperparameter Bayesian (Optuna TPE)
+![Arsitektur Model Eksplorasi Attention-CRNN](attention_crnn_architecture.svg)
+*Gambar 4.2: Diagram Alur Arsitektur Model Eksplorasi Sekuensial: Attention-based CRNN.*
+
+#### 3. Optimasi Hiperparameter Otomatis (Bayesian Optimization — Optuna TPE)
 * **Algoritma:** *Tree-structured Parzen Estimator* (Optuna TPE) sebanyak 30 *trials* dengan *MedianPruner* untuk menghentikan iterasi suboptimal sejak dini.
 * **Fungsi Objektif:** Memaksimalkan skor validasi **Unweighted Average Recall (UAR)** untuk memastikan performa yang adil di seluruh 8 kelas emosi.
 
@@ -267,7 +279,7 @@ Model dievaluasi secara ketat menggunakan partisi **Speaker-Independent 5-Fold C
 
 ### Tahap 6: Deployment & Arsitektur Pelayanan Microservice Produksi (FastAPI + Uvicorn)
 
-Untuk membuktikan keandalan komputasi afektif secara nyata di tingkat produksi industri, sistem deployment dibangun menggunakan arsitektur microservice modern **FastAPI + Uvicorn** (`app.py`), dikemas dalam kontainer **Docker & Docker Compose**, serta menyediakan antarmuka web *Dark Glassmorphism* interaktif:
+Untuk membuktikan keandalan komputasi afektif secara nyata di tingkat produksi industri, sistem deployment dibangun menggunakan arsitektur microservice modern **FastAPI + Uvicorn** (`app.py`) pada **Port `8015`**, dikemas dalam kontainer **Docker & Docker Compose**, serta menyediakan antarmuka web *Dark Glassmorphism* interaktif:
 
 ![Arsitektur Deployment Affective Computing](deployment_2mode_architecture.svg)
 *Gambar 6.1: Diagram Alur Arsitektur Deployment Microservice FastAPI: REST API & Antarmuka Interaktif Pengenalan Emosi Wicara.*
