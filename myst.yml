@@ -51,6 +51,14 @@ project:
         - file: src/project_akhir/4-modelling/1-modeling.ipynb
         - file: src/project_akhir/5-evaluation/1-evaluation.ipynb
         - file: src/project_akhir/6-deploy/1-deployment.ipynb
+    - title: Pengolahan Citra (Klasifikasi Kerapian Sandal & Sepatu)
+      children:
+        - file: src/10-project_citra/1-business_understanding/1-business.md
+        - file: src/10-project_citra/2-data_understanding/1-data_understanding.ipynb
+        - file: src/10-project_citra/3-data_preparation/1-data_preparation.ipynb
+        - file: src/10-project_citra/4-modeling/1-modeling.ipynb
+        - file: src/10-project_citra/5-evaluation/1-evaluation.ipynb
+        - file: src/10-project_citra/6-deployment/1-deployment.ipynb
 
   # github:
   # To autogenerate a Table of Contents, run "jupyter book init --write-toc"
