@@ -25,8 +25,8 @@ Repositori ini memuat kumpulan proyek dan penelitian **Proyek Sains Data (*Data 
    * Akuisisi data melalui *Web Crawling*, eksplorasi karakteristik fitur, *preprocessing*, pemodelan *machine learning*, dan evaluasi kinerja model.
 3. **Tugas UTS — Analisis & Pemodelan Prediktif End-to-End (`src/Tugas_UTS`)**
    * Implementasi siklus penuh 6 tahap CRISP-DM beserta aplikasi *deployment* interaktif.
-4. **Project Akhir — Speech Emotion Recognition (SER) Berbasis Attention-based CRNN pada Dataset RAVDESS (`src/project_akhir`)**
-   * Sistem pengenalan emosi manusia dari sinyal suara vokal (*Audio/Speech*) untuk **8 kelas emosi** menggunakan arsitektur tunggal **Attention-based CRNN (2D-CNN + Bidirectional LSTM + Multi-Head Self-Attention)**, dilengkapi strategi **Hybrid Class Balancing**, **Speaker-Independent Validation**, serta **Deployment Real-Time (`FP16 Runtime`)** dengan kalibrasi lintas bahasa dan logat daerah.
+4. **Project Akhir — Speech Emotion Recognition (SER) Berbasis Affective Computing pada Dataset RAVDESS (`src/project_akhir`)**
+   * Sistem pengenalan emosi manusia dari sinyal suara vokal (*Audio/Speech*) untuk **8 kelas emosi** dengan pendekatan dua pilar: **Master Hybrid Soft-Voting Ensemble (RBF-SVM + Deep MLP)** untuk inferensi produksi microservice real-time (**FastAPI pada Port `8015`**) dan **Attention-based CRNN (2D-CNN + Bi-LSTM + Multi-Head Self-Attention)** sebagai benchmark deep learning sekuensial temporal, didukung strategi **Hybrid Class Balancing**, **Speaker-Independent Validation**, dan **Normalisasi Invarian CMVN**.
 
 ---
 
@@ -47,20 +47,23 @@ Dataset menggunakan **RAVDESS (*Ryerson Audio-Visual Database of Emotional Speec
 | **`07`** | **`Disgust`** | Jijik / Tidak Suka | `192` | `144` | **`288`** *(Augmentasi $2\times$)* | *Medium Arousal*, *Negative Valence* |
 | **`08`** | **`Surprised`** | Terkejut / Kaget | `192` | `144` | **`288`** *(Augmentasi $2\times$)* | *High Arousal*, *Positive–Neutral Valence* |
 
-### 2. Metodologi & Arsitektur (`Attention-based CRNN`)
+### 2. Metodologi, Arsitektur Model, & Hasil Evaluasi Riil
 
-* **Pra-pemrosesan Sinyal & Ekstraksi Fitur Multi-Domain (`264 Kanal × 94 Frame`):**
-  * Konversi *Mono*, *Resampling* ke `16.000 Hz`, *Silence Trimming (`25 dB`)*, *Pre-Emphasis Filter ($\alpha = 0,97$)*, dan penyeragaman durasi `3,0 detik` (`48.000 sampel`).
-  * Ekstraksi **Log Mel-Spectrogram (`128 bin`)**, **MFCC (`40 Statis + 40 Delta + 40 Delta-Delta = 120 kanal`)**, **Chromagram (`12 pitch class`)**, serta **Fitur Prosodi & Spektral (`4 kanal`: *RMS Energy*, *ZCR*, *Spectral Centroid*, *Spectral Rolloff*)**.
-* **Pembagian Data *Speaker-Independent* & *Hybrid Class Balancing*:**
-  * **Training Set (`Actor 01–18`):** `1.080` sampel asli $\to$ diseimbangkan melalui *Targeted Audio Augmentation Oversampling* menjadi **`2.304` sampel (`288 sampel/kelas`)**.
-  * **Validation Set (`Actor 19–20`):** `120` sampel asli murni.
-  * **Testing Set (`Actor 21–24`):** `240` sampel asli murni (*Unseen Speakers*).
-  * **Level Algoritma:** Menggunakan *Inverse Class-Frequency Weighting ($w_k$)* pada *Weighted Categorical Cross-Entropy Loss*.
-* **Hasil Evaluasi Model:**
-  * **Testing Set (`Actor 21–24`, Penutur Baru):** `WAR / Accuracy = 90,42%` | `UAR / Macro Recall = 91,02%` | `Macro Precision = 90,62%` | `Macro F1 = 90,64%` | `ROC-AUC = 99,31%`.
-  * **5-Fold Speaker-Independent Cross-Validation (`24 Aktor`):** `WAR = 95,14%` | `UAR = 95,44%` | `Macro Precision = 94,76%` | `Cohen's Kappa = 0,9442`.
-  * **Deployment Runtime (`FP16`):** Ukuran memori bobot berkurang `50%` (`697,27 KB`) dengan latensi inferensi model `< 1,0 ms` (target bisnis `< 40 ms` terpenuhi).
+* **Pra-pemrosesan Sinyal & Ekstraksi Fitur Multi-Domain (528, 766, dan 845 Fitur):**
+  * Konversi *Mono*, *Resampling* ke `16.000 Hz`, *Silence Trimming (`25 dB`)*, *Pre-Emphasis Filter ($lpha = 0,97$)*, dan penyeragaman durasi `3,0 detik` (`48.000 sampel`).
+  * **528 Fitur Tabular:** $264	ext{ Mean } \mu + 264	ext{ Std } \sigma$ dari 264 kanal sekuensial (Log-Mel 128, MFCC 120 kanal, Chroma 12, Prosodi 4) disimpan di `ravdess_extracted_features_528.csv`.
+  * **766 Fitur Master Multidimensi:** Pengayaan fitur ($528 + 35	ext{ Fast Affective} + 35	ext{ Log-Energy} + 71	ext{ Prosody/Pitch } f_0 + 97	ext{ Dinamika 3-Segmen}$) disimpan di `ravdess_prepared_features_and_scaler.npz` untuk menangani kalimat identik RAVDESS.
+  * **845 Fitur Produksi Runtime:** Ekstraksi terkalibrasi CMVN (*Utterance-Level Cepstral Mean & Variance Normalization*) untuk deployment FastAPI bebas bias mikrofon.
+* **Pendekatan Dua Pilar Pemodelan Afektif:**
+  * **Pilar 1 (Produksi Microservice): Master Hybrid Soft-Voting Ensemble (RBF-SVM + Deep MLP):** Menggabungkan ketangguhan margin RBF-SVM ($C=4.0$) dengan fleksibilitas korelasi non-linier Deep MLP (256/128 neuron) melalui *Soft-Voting* probabilitas terkalibrasi.
+  * **Pilar 2 (Benchmark Sekuensial): Attention-based CRNN (2D-CNN + 2-Layer Bi-LSTM + Multi-Head Self-Attention):** Memetakan tensor waktu-frekuensi ($264 	imes 94$) untuk mendeteksi suku kata dengan intensitas afektif puncak melalui matriks *Scaled Dot-Product Attention*.
+* **Hasil Evaluasi Riil Terverifikasi:**
+  * **Testing Set Murni (288 sampel uji unseen):** `WAR / Akurasi = 80,21%` (231 / 288 audio tepat) murni bebas data leakage.
+  * **Top-2 Diagnostic Accuracy:** `89,93%` (259 / 288 audio).
+  * **Top-3 Diagnostic Accuracy:** `94,79%` (273 / 288 audio).
+  * **5-Fold Stratified Cross-Validation (1.440 sampel):** `Akurasi Rata-rata = 81,11%` (1.168 / 1.440 audio).
+  * **Data Latih (1.152 sampel):** `Konvergensi = 100,00%`.
+  * **Deployment FastAPI (Port 8015):** Latensi end-to-end `< 85 ms` per audio wicara.
 
 ---
 
@@ -102,8 +105,8 @@ proyek sain data/
 │       │   └── images/                                # Confusion matrix 8x8, kurva ROC/PR, & analisis sub-kelompok
 │       └── 6-deploy/
 │           ├── 1-deployment.ipynb                     # Notebook eksportasi FP16, benchmark latensi, & pemetaan afektif
-│           ├── app.py                                 # Aplikasi Web Interaktif Streamlit (Kalibrasi Lintas Bahasa/Logat)
-│           ├── api_server.py                          # Layanan Mikro REST API (Starlette / Uvicorn)
+│           ├── app.py                                 # Layanan Mikro REST API & Web Dashboard FastAPI (Port 8015)
+│           ├── uji_deploy/                            # 32 audio demo terpisah dalam 8 folder emosi diskrit
 │           ├── requirements.txt                       # Dependensi paket deployment
 │           ├── models/
 │           │   ├── attention_crnn_fp16_runtime.npz    # Bobot model runtime FP16 & dekoder akustik bebas gain
