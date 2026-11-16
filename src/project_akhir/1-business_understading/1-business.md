@@ -215,6 +215,31 @@ $$\text{Total Fitur Tabular} = 264\ (\mu) + 264\ (\sigma) = \mathbf{528\text{ Fi
 
 ---
 
+#### 4. Evolusi Hierarki Fitur: 528 vs 766 vs 845 Fitur Akustik
+
+Untuk memberikan pemahaman komprehensif mengenai dimensi representasi fitur, tabel di bawah menyajikan evolusi fitur dari bentuk tabular dasar (528), fitur master pelatihan (766), hingga fitur runtime deployment (845):
+
+| No | Nama Kelompok Fitur | Jumlah Fitur | Komponen Fitur | Penjelasan & Kegunaan Emosional |
+| :---: | :--- | :---: | :--- | :--- |
+| **1** | **Log Mel-Spectrogram** | **`256`** | 128 Kanal Rata-rata ($\mu$) + 128 Kanal Std ($\sigma$) | Menangkap distribusi energi frekuensi wicara pada skala pendengaran manusia ($0 - 8.000\text{ Hz}$). Berguna membedakan desah napas emosional vs suara lantang. |
+| **2** | **MFCC Statis** | **`80`** | 40 Koefisien ($\mu$) + 40 Koefisien ($\sigma$) | Memetakan selubung spektral saluran vokal (*timbre* suara). Berguna membedakan kualitas vokal tertekan (*Sad*) vs vokal tajam tegang (*Angry*). |
+| **3** | **Delta MFCC ($\Delta$)** | **`80`** | 40 Koefisien ($\mu$) + 40 Koefisien ($\sigma$) | Mengukur **kecepatan perubahan intonasi** antar suku kata (*velocity* artikulasi). Berkorelasi dengan laju bicara saat panik atau terkejut. |
+| **4** | **Delta-Delta MFCC ($\Delta\Delta$)** | **`80`** | 40 Koefisien ($\mu$) + 40 Koefisien ($\sigma$) | Mengukur **percepatan letupan suara** (*acceleration*). Mendeteksi sentakan suara mendadak pada *Surprised* atau letupan kata pada *Angry*. |
+| **5** | **Chroma STFT** | **`24`** | 12 Kelas Nada ($\mu$) + 12 Kelas Nada ($\sigma$) | Memetakan musikalitas vokal (12 tangga nada $C, C\sharp, \dots, B$). Berguna mendeteksi *Valence* positif (nada ceria bernuansa mayor) vs negatif (sedih bernuansa minor). |
+| **6** | **Fitur Prosodi & Spektral Global** | **`8`** | RMSE ($\mu, \sigma$), ZCR ($\mu, \sigma$), Centroid ($\mu, \sigma$), Rolloff ($\mu, \sigma$) | Mengukur intensitas energi suara (RMSE), desis napas tak bersuara (ZCR), kecerahan vokal (Spectral Centroid), dan batas energi frekuensi tinggi (Rolloff). |
+| **--** | *(Subtotal Fitur Tabular Awal)* | **`528`** | *(264 Nilai Mean + 264 Nilai Std)* | *(Fitur dasar yang diekspor ke file CSV untuk audit spreadsheet).* |
+| **7** | **Fast Affective Energy** | **`35`** | Rasio Pita Energi (Mid-Low, High-Mid, Air-High), Hammarberg Index, Alpha Ratio, Spectral Flux & Flatness | Mengukur ketegangan pita suara dan rasio desah udara pada laring (*glottal leakiness*), sangat sensitif membedakan emosi tenang (*Calm*) vs tegang (*Fearful*). |
+| **8** | **Log-Energy Filterbanks** | **`35`** | Transformasi non-linier logaritmik $\log(1 + \text{max}(0, x))$ dari 35 fitur afektif | Menstabilkan variansi energi audio agar skala bisikan lembut dan teriakan kencang dapat diproses secara proporsional oleh model tanpa distorsi. |
+| **9** | **Pitch ($f_0$) & Prosody** | **`71`** | Nilai Frekuensi Dasar ($f_0$ mean, std, min, max, range, skew), Jitter, Voiced Ratio, Kemiringan Pitch Slope | Melacak dinamika getaran pita suara. Emosi marah dan bahagia memiliki pitch tinggi berfluktuasi tajam, sedangkan sedih memiliki pitch rendah dan datar. |
+| **10** | **Temporal 3-Segment Dynamics** | **`97`** | Segmentasi Waktu: Segmen Awal (0–1s), Segmen Tengah (1–2s), Segmen Akhir (2–3s), $\Delta_{\text{end}-\text{beg}}$, Slope | Membagi rekaman menjadi 3 bagian untuk melihat bagaimana emosi bergerak dari awal kata diucapkan hingga hening di akhir kalimat. |
+| **TOTAL** | **FITUR MASTER MODEL** | **`766`** | **$528 + 35 + 35 + 71 + 97 = \mathbf{766\text{ Fitur}}$** | **Input utama untuk melatih model Ensemble & Attention-CRNN.** |
+
+* **Ruang Fitur Produksi Deployment (845 Fitur):**
+  Saat di-deploy ke FastAPI (`app.py`), diterapkan seleksi 680 fitur master (`keep_mask`) ditambah 165 fitur kalibrasi **Utterance-Level CMVN (*Cepstral Mean and Variance Normalization*)** sehingga model kebal terhadap perbedaan gain mikrofon rekaman pengguna:
+  $$\mathbf{845\text{ Fitur Deployment}} = 680\text{ (Fitur Master Terseleksi)} + 165\text{ (Fitur CMVN Invarian)}$$
+
+---
+
 ### Tahap 4: Pemodelan Afektif (Master Hybrid Ensemble & Eksplorasi Deep Learning)
 
 Tahap pemodelan mengadopsi pendekatan dua pilar komplementer untuk mencapai performa klasifikasi emosi tertinggi dan daya tahan (*robustness*) optimal di lingkungan produksi:
