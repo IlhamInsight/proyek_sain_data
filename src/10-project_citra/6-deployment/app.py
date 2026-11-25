@@ -1,15 +1,18 @@
 import io
 import time
+import json
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import numpy as np
+import joblib
+from feature_extraction import FEATURE_COLUMNS, extract_image_features
 
 app = FastAPI(
     title="Footwear Tidiness Classifier API",
-    description="API Klasifikasi Kerapian Sandal dan Sepatu (Alas Kaki) Berbasis Computer Vision",
+    description="API Klasifikasi Kerapian Sandal dan Sepatu (Alas Kaki) Berbasis Computer Vision & Machine Learning",
     version="1.0.0"
 )
 
@@ -21,7 +24,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-CLASSES = ["Tidak Rapi (Untidy)", "Rapi (Tidy)"]
+CLASSES = ["Tidak Rapi (Berantakan)", "Rapi (Tidy)"]
+
+# Load Model, Scaler, and Features configuration
+CURRENT_DIR = Path(__file__).resolve().parent
+MODEL_PATH = CURRENT_DIR / "best_model.joblib"
+SCALER_PATH = CURRENT_DIR / "scaler.joblib"
+FEATURE_COLS_PATH = CURRENT_DIR / "feature_columns.json"
+if not FEATURE_COLS_PATH.exists():
+    FEATURE_COLS_PATH = CURRENT_DIR.parent / "4-modeling" / "models" / "feature_columns.json"
+
+model = None
+scaler = None
+feature_cols = None
+
+try:
+    if MODEL_PATH.exists():
+        model = joblib.load(MODEL_PATH)
+    if SCALER_PATH.exists():
+        scaler = joblib.load(SCALER_PATH)
+    if FEATURE_COLS_PATH.exists():
+        with open(FEATURE_COLS_PATH, "r") as f:
+            feature_cols = json.load(f)
+    if feature_cols is None:
+        feature_cols = FEATURE_COLUMNS
+    print("Model, scaler, and feature definitions loaded successfully.")
+except Exception as e:
+    print(f"Warning: Failed to load model/scaler: {e}")
+
+def extract_features_from_image(img_rgb):
+    features = extract_image_features(img_rgb)
+    columns = feature_cols or FEATURE_COLUMNS
+    try:
+        return [features[column] for column in columns]
+    except KeyError as e:
+        raise RuntimeError(f"Fitur model tidak dikenali: {e.args[0]}") from e
 
 @app.get("/", response_class=HTMLResponse)
 def index():
@@ -88,6 +125,8 @@ def index():
                         resultDiv.innerHTML = `
                             <h3 style="color: ${statusColor}; margin-top: 0;">Hasil: ${data.predicted_class}</h3>
                             <p><strong>Tingkat Keyakinan:</strong> ${(data.confidence * 100).toFixed(2)}%</p>
+                            <p><strong>Probabilitas Rapi:</strong> ${(data.class_probabilities['Rapi (Tidy)'] * 100).toFixed(2)}%</p>
+                            <p><strong>Probabilitas Berantakan:</strong> ${(data.class_probabilities['Tidak Rapi (Berantakan)'] * 100).toFixed(2)}%</p>
                             <p><strong>Waktu Inferensi:</strong> ${data.inference_latency_ms.toFixed(1)} ms</p>
                         `;
                     } else {
@@ -104,42 +143,67 @@ def index():
 
 @app.get("/health")
 def health_check():
+    model_ready = model is not None and scaler is not None
     return {
-        "status": "healthy",
+        "status": "healthy" if model_ready else "unavailable",
         "service": "footwear-tidiness-classifier",
+        "model_loaded": model_ready,
         "timestamp": time.time()
     }
 
 @app.post("/api/v1/predict")
 async def predict_image(file: UploadFile = File(...)):
     start_time = time.time()
-    if not file.content_type.startswith("image/"):
+    if not (file.content_type or "").startswith("image/"):
         raise HTTPException(status_code=400, detail="File yang diunggah harus berformat gambar.")
     
     contents = await file.read()
     try:
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        image = Image.open(io.BytesIO(contents))
+        orig_size = image.size
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Gagal memproses file citra: {str(e)}")
     
-    # Placeholder inference logic (akan dihubungkan ke bobot model PyTorch/TensorFlow setelah training)
-    # Default behavior sebelum model selesai dilatih:
+    if model is None or scaler is None:
+        raise HTTPException(status_code=500, detail="Model atau Scaler belum dimuat di server.")
+    
+    # Ekstraksi fitur visual (mempertahankan orientasi EXIF saat ekstraksi)
+    feats = extract_features_from_image(image)
+    X = np.array(feats).reshape(1, -1)
+    X_scaled = scaler.transform(X)
+    
+    pred_label = int(model.predict(X_scaled)[0])
+    probs = model.predict_proba(X_scaled)[0]
+    
+    class_probabilities = {
+        int(class_label): float(probability)
+        for class_label, probability in zip(model.classes_, probs)
+    }
+    if 0 not in class_probabilities or 1 not in class_probabilities:
+        raise HTTPException(status_code=500, detail="Model tidak memiliki dua kelas yang diharapkan.")
+
+    prob_berantakan = class_probabilities[0]
+    prob_rapi = class_probabilities[1]
+    
+    confidence = float(max(prob_rapi, prob_berantakan))
+    predicted_class = "Rapi (Tidy)" if pred_label == 1 else "Tidak Rapi (Berantakan)"
+    
     latency_ms = (time.time() - start_time) * 1000
     
     return {
         "filename": file.filename,
         "image_size": image.size,
-        "predicted_class": "Menunggu Bobot Model Training",
-        "confidence": 0.95,
+        "predicted_class": predicted_class,
+        "label": pred_label,
+        "confidence": round(confidence, 4),
         "class_probabilities": {
-            "Rapi (Tidy)": 0.50,
-            "Tidak Rapi (Untidy)": 0.50
+            "Rapi (Tidy)": round(prob_rapi, 4),
+            "Tidak Rapi (Berantakan)": round(prob_berantakan, 4)
         },
-        "inference_latency_ms": latency_ms,
-        "status": "ready_for_model_weights"
+        "inference_latency_ms": round(latency_ms, 2),
+        "status": "success"
     }
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8016, reload=True)
-
