@@ -3,10 +3,11 @@ from PIL import Image, ImageOps, ImageStat
 from scipy import ndimage
 
 
-# 65 fitur visual tahan-pencahayaan dan tahan-warna-lantai (floor-invariant)
-# serta keragaman warna (standar deviasi RGB/HSV) untuk klasifikasi kerapian alas kaki.
+# 75 fitur visual tahan-pencahayaan dan tahan-warna-lantai (floor-invariant)
+# serta keragaman warna klasik (standar deviasi RGB/HSV) dan geometri objek foreground
+# untuk klasifikasi kerapian alas kaki bebas overfitting.
 FEATURE_COLUMNS = [
-    # Keragaman warna klasik (standar deviasi per kanal - invarian terhadap warna lantai)
+    # 1. Keragaman warna klasik (standar deviasi per kanal - invarian terhadap warna lantai)
     "std_red",
     "std_green",
     "std_blue",
@@ -20,7 +21,7 @@ FEATURE_COLUMNS = [
     "inter_blk_sat_cv",
     "blk_hue_std_mean",
     "blk_hue_std_cv",
-    # Keteraturan orientasi gradien & paralelisme (Structure Tensor)
+    # 2. Keteraturan orientasi gradien & paralelisme (Structure Tensor)
     "orient_entropy",
     "orient_gini",
     "orient_max",
@@ -32,7 +33,8 @@ FEATURE_COLUMNS = [
     "global_coh",
     "blk_coh_mean",
     "blk_coh_std",
-    # Sebaran & kepadatan tepi spasial (Grid 4x4 & 8x8)
+    "center_coh",
+    # 3. Sebaran & kepadatan tepi spasial (Grid 4x4 & 8x8)
     "spatial_edge_entropy",
     "ed_cv",
     "ed_s_cv",
@@ -40,7 +42,7 @@ FEATURE_COLUMNS = [
     "fine_entropy",
     "fine_cv",
     "fine_gini",
-    # Spektrum Frekuensi 2D FFT (Radial & Angular alignment)
+    # 4. Spektrum Frekuensi 2D FFT (Radial & Angular alignment)
     "fft_ang_entropy",
     "fft_ang_gini",
     "fft_ang_max",
@@ -50,26 +52,35 @@ FEATURE_COLUMNS = [
     "fft_band_3",
     "fft_band_4",
     "fft_band_5",
-    # Profil proyeksi baris/kolom & kesimetrian citra
+    # 5. Profil proyeksi, Radon alignment (rotasi-invarian), & kesimetrian citra
     "row_proj_cv",
     "col_proj_cv",
     "max_proj_cv",
     "proj_aniso",
     "row_proj_gini",
     "col_proj_gini",
+    "radon_cv_max",
+    "radon_aniso",
+    "radon_peak_max",
     "lr_edge_sym",
     "tb_edge_sym",
+    "center_lr_sym",
     "lr_gray_corr",
     "tb_gray_corr",
     "center_border_ratio",
     "top_bot_ratio",
-    # Sebaran objek / komponen tepi foreground
+    "inner_outer_ratio",
+    # 6. Geometri & sebaran komponen objek foreground
     "fg_ratio",
     "fg_spread_x",
     "fg_spread_y",
     "fg_spread_diag",
+    "fg_dist_mean",
+    "fg_dist_p75",
+    "fg_dist_iqr",
+    "fg_elongation",
     "n_comp",
-    # Tekstur lokal LBP & GLCM (Gray-Level Co-occurrence Matrix)
+    # 7. Tekstur lokal LBP & GLCM (Gray-Level Co-occurrence Matrix)
     "lbp_uniform",
     "lbp_edge_ratio",
     "glcm_contrast_mean",
@@ -126,16 +137,16 @@ def _compute_glcm_features(gray_u8: np.ndarray, levels: int = 16) -> dict[str, f
 
 def extract_image_features(image: Image.Image) -> dict[str, float | int]:
     """
-    Mengekstrak fitur visual klasik (statistik warna RGB/HSV per kanal)
-    serta fitur struktural, spektral (FFT), simetri, dan tekstur (LBP & GLCM)
-    yang tangguh terhadap variasi warna lantai dan pencahayaan.
+    Mengekstrak 75 fitur visual klasik & invarian lantai:
+    statistik warna RGB/HSV, gradien Sobel, tensor struktur, Radon alignment,
+    spektrum 2D FFT, geometri foreground, simetri, dan tekstur LBP/GLCM.
     """
     image = ImageOps.exif_transpose(image).convert("RGB")
     w_orig, h_orig = image.size
     resized = image.resize((224, 224), Image.Resampling.BILINEAR)
     rgb = np.asarray(resized, dtype=np.float32)
 
-    # 1. Statistik warna klasik RGB & HSV (Rata-rata & Standar Deviasi per kanal)
+    # 1. Statistik warna klasik RGB & HSV
     rgb_stats = ImageStat.Stat(resized)
     r_m, g_m, b_m = rgb_stats.mean
     r_s, g_s, b_s = rgb_stats.stddev
@@ -160,13 +171,13 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
     blk_hue_std_mean = float(np.mean(blk_hue_stds))
     blk_hue_std_cv = float(np.std(blk_hue_stds) / (np.mean(blk_hue_stds) + 1e-6))
 
-    # 2. Normalisasi kontras dan pencahayaan pada skala abu-abu (Grayscale)
+    # 2. Normalisasi kontras skala abu-abu
     gray_raw = np.asarray(resized.convert("L"), dtype=np.float32)
     p2, p98 = np.percentile(gray_raw, [2, 98])
     gray_cs = np.clip((gray_raw - p2) / (p98 - p2 + 1e-6), 0.0, 1.0)
     gray_norm = (gray_raw - gray_raw.mean()) / (gray_raw.std() + 1e-6)
 
-    # 3. Gradien Sobel multi-skala & Koherensi Tensor Struktur
+    # 3. Gradien Sobel multi-skala & Tensor Struktur
     gx = ndimage.sobel(gray_cs, axis=1)
     gy = ndimage.sobel(gray_cs, axis=0)
     mag = np.hypot(gx, gy)
@@ -203,6 +214,8 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
         return float(np.sqrt((jxx - jyy) ** 2 + 4 * jxy * jxy) / (jxx + jyy + 1e-8))
 
     global_coh = _st_coh(gx_s, gy_s)
+    center_coh = _st_coh(gx[45:179, 45:179], gy[45:179, 45:179])
+
     blk_cohs, blk_eds, blk_eds_s = [], [], []
     for r in range(4):
         for c in range(4):
@@ -230,7 +243,7 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
     fine_cv = float(fine_eds.std() / (fine_eds.mean() + 1e-8))
     fine_gini = _gini(fine_eds)
 
-    # 4. Spektrum Frekuensi 2D FFT (Radial & Angular)
+    # 4. Spektrum Frekuensi 2D FFT
     fft_mag = np.abs(np.fft.fftshift(np.fft.fft2(gray_norm)))
     fft_pow = fft_mag ** 2
     yy, xx = np.ogrid[:224, :224]
@@ -251,15 +264,28 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
     fft_ang_gini = _gini(fft_ang_hist)
     fft_ang_max = float(fft_ang_hist.max())
 
-    # 5. Profil Proyeksi & Simetri Spasial
+    # 5. Profil Proyeksi, Radon Rotated Alignment, & Simetri
     row_proj = np.mean(mag, axis=1)
     col_proj = np.mean(mag, axis=0)
     row_proj_cv = float(row_proj.std() / (row_proj.mean() + 1e-8))
     col_proj_cv = float(col_proj.std() / (col_proj.mean() + 1e-8))
 
+    mag_small = ndimage.zoom(mag, 64.0 / 224.0, order=1)
+    proj_cvs, proj_peaks = [], []
+    for ang in range(0, 180, 15):
+        rot = ndimage.rotate(mag_small, ang, reshape=False, order=1)
+        c_roi = rot[12:52, 12:52]
+        p = np.mean(c_roi, axis=1)
+        proj_cvs.append(float(p.std() / (p.mean() + 1e-8)))
+        proj_peaks.append(float(p.max() / (p.mean() + 1e-8)))
+
     mag_norm = mag / (mag.mean() + 1e-8)
     lr_edge_sym = float(np.mean(np.abs(mag_norm - np.fliplr(mag_norm))))
     tb_edge_sym = float(np.mean(np.abs(mag_norm - np.flipud(mag_norm))))
+    c_mag = mag[45:179, 45:179]
+    c_norm = c_mag / (c_mag.mean() + 1e-8)
+    center_lr_sym = float(np.mean(np.abs(c_norm - np.fliplr(c_norm))))
+
     lr_gray_corr = float(np.corrcoef(gray_norm.ravel(), np.fliplr(gray_norm).ravel())[0, 1])
     tb_gray_corr = float(np.corrcoef(gray_norm.ravel(), np.flipud(gray_norm).ravel())[0, 1])
 
@@ -268,18 +294,32 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
     center_border_ratio = float(center_mag / (border_mag + 1e-8))
     top_bot_ratio = float(mag[:112, :].mean() / (mag[112:, :].mean() + 1e-8))
 
-    # 6. Sebaran Foreground Tepi
+    r_norm = dist / 112.0
+    inner_edge = float(mag[r_norm <= 0.55].mean())
+    outer_edge = float(mag[(r_norm > 0.55) & (r_norm <= 1.0)].mean())
+    inner_outer_ratio = float(inner_edge / (outer_edge + 1e-8))
+
+    # 6. Geometri & Sebaran Objek Foreground
     thresh = np.mean(mag) + np.std(mag)
     fg_mask = mag > thresh
     fg_ratio = float(np.mean(fg_mask))
-    if np.sum(fg_mask) > 10:
+    if np.sum(fg_mask) > 20:
         ys, xs = np.where(fg_mask)
         fg_spread_x = float(np.std(xs) / 224.0)
         fg_spread_y = float(np.std(ys) / 224.0)
         fg_spread_diag = float(np.hypot(fg_spread_x, fg_spread_y))
+        cy, cx = ys.mean(), xs.mean()
+        dists = np.sqrt((ys - cy) ** 2 + (xs - cx) ** 2) / 224.0
+        fg_dist_mean = float(dists.mean())
+        fg_dist_p75 = float(np.percentile(dists, 75))
+        fg_dist_iqr = float(np.percentile(dists, 75) - np.percentile(dists, 25))
+        cov = np.cov(np.vstack([xs, ys]))
+        eigvals = np.linalg.eigvalsh(cov)
+        fg_elongation = float((eigvals[1] - eigvals[0]) / (eigvals[1] + eigvals[0] + 1e-8))
         _, n_comp = ndimage.label(ndimage.binary_closing(fg_mask, structure=np.ones((3, 3))))
     else:
-        fg_spread_x, fg_spread_y, fg_spread_diag, n_comp = 0.0, 0.0, 0.0, 0
+        fg_spread_x, fg_spread_y, fg_spread_diag = 0.0, 0.0, 0.0
+        fg_dist_mean, fg_dist_p75, fg_dist_iqr, fg_elongation, n_comp = 0.0, 0.0, 0.0, 0.0, 0
 
     # 7. Tekstur LBP & GLCM
     glcm_feats = _compute_glcm_features((gray_cs * 255).astype(np.uint8), levels=16)
@@ -329,6 +369,7 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
         "global_coh": round(global_coh, 6),
         "blk_coh_mean": round(float(blk_cohs.mean()), 6),
         "blk_coh_std": round(float(blk_cohs.std()), 6),
+        "center_coh": round(center_coh, 6),
         "spatial_edge_entropy": round(spatial_edge_entropy, 6),
         "ed_cv": round(ed_cv, 6),
         "ed_s_cv": round(ed_s_cv, 6),
@@ -345,16 +386,25 @@ def extract_image_features(image: Image.Image) -> dict[str, float | int]:
         "proj_aniso": round(abs(row_proj_cv - col_proj_cv), 6),
         "row_proj_gini": round(_gini(row_proj), 6),
         "col_proj_gini": round(_gini(col_proj), 6),
+        "radon_cv_max": round(max(proj_cvs), 6),
+        "radon_aniso": round(max(proj_cvs) - min(proj_cvs), 6),
+        "radon_peak_max": round(max(proj_peaks), 6),
         "lr_edge_sym": round(lr_edge_sym, 6),
         "tb_edge_sym": round(tb_edge_sym, 6),
+        "center_lr_sym": round(center_lr_sym, 6),
         "lr_gray_corr": round(0.0 if np.isnan(lr_gray_corr) else lr_gray_corr, 6),
         "tb_gray_corr": round(0.0 if np.isnan(tb_gray_corr) else tb_gray_corr, 6),
         "center_border_ratio": round(center_border_ratio, 6),
         "top_bot_ratio": round(top_bot_ratio, 6),
+        "inner_outer_ratio": round(inner_outer_ratio, 6),
         "fg_ratio": round(fg_ratio, 6),
         "fg_spread_x": round(fg_spread_x, 6),
         "fg_spread_y": round(fg_spread_y, 6),
         "fg_spread_diag": round(fg_spread_diag, 6),
+        "fg_dist_mean": round(fg_dist_mean, 6),
+        "fg_dist_p75": round(fg_dist_p75, 6),
+        "fg_dist_iqr": round(fg_dist_iqr, 6),
+        "fg_elongation": round(fg_elongation, 6),
         "n_comp": int(n_comp),
         "lbp_uniform": round(lbp_uniform, 6),
         "lbp_edge_ratio": round(lbp_edge_ratio, 6),

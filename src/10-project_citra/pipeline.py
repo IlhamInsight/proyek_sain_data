@@ -9,13 +9,9 @@ import numpy as np
 import pandas as pd
 from PIL import Image, ImageOps
 from sklearn.base import clone
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.ensemble import (
-    ExtraTreesClassifier,
-    GradientBoostingClassifier,
-    RandomForestClassifier,
-    VotingClassifier,
-)
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
@@ -28,7 +24,8 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PowerTransformer
 from sklearn.svm import SVC
 from lightgbm import LGBMClassifier
 
@@ -36,7 +33,7 @@ from feature_extraction import FEATURE_COLUMNS, extract_image_features
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
-# Lokasi dataset kini berada di dalam folder 2-data_understanding/data
+# Lokasi dataset berada di dalam folder 2-data_understanding/data
 DATASET_DIR = PROJECT_DIR / "2-data_understanding" / "data"
 PREPARATION_DIR = PROJECT_DIR / "3-data_preparation"
 PROCESSED_DIR = PREPARATION_DIR / "data" / "processed"
@@ -119,7 +116,6 @@ def prepare_dataset() -> pd.DataFrame:
 
             with Image.open(image_path) as image:
                 features = extract_image_features(image)
-                # Ekstrak juga versi pencerminan horizontal (untuk augmentasi khusus fold latih)
                 flipped = ImageOps.mirror(ImageOps.exif_transpose(image).convert("RGB"))
                 features_flip = extract_image_features(flipped)
 
@@ -222,7 +218,6 @@ def prepare_dataset() -> pd.DataFrame:
     frame.to_csv(PROCESSED_DIR / "dataset_manifest.csv", index=False)
     frame.to_csv(manifest_path, index=False)
 
-    # Simpan fitur augmentasi horizontal khusus data train (tidak pernah menyimpan/memakai augmentasi test)
     frame_flip.loc[
         (frame_flip["split"] == "train") & frame_flip["include_in_model"]
     ].to_csv(PROCESSED_DIR / "train_flip_features.csv", index=False)
@@ -262,101 +257,90 @@ def prepare_dataset() -> pd.DataFrame:
         .unstack(fill_value=0)
     )
     print(f"Train: semua kelompok kecuali {TEST_GROUP}; Test (Unseen): {TEST_GROUP}")
-    if label_review_candidates:
-        print(
-            f"Peringatan: {len(label_review_candidates)} kandidat label perlu ditinjau; "
-            f"lihat {review_path}"
-        )
     print(f"Manifest tersimpan: {manifest_path}")
     return frame
 
 
 def _build_candidate_models() -> dict:
+    """
+    Kandidat model terregularisasi untuk mencegah overfitting pada 120 citra pengembangan
+    sekaligus memaksimalkan kemampuan generalisasi pada kelompok baru.
+    """
     return {
-        "MLP_Ensemble": VotingClassifier(
-            estimators=[
-                (
-                    f"mlp_{seed}",
-                    MLPClassifier(
-                        hidden_layer_sizes=(32, 16),
-                        alpha=1.0,
-                        max_iter=1000,
-                        random_state=seed,
-                    ),
-                )
-                for seed in (42, 100, 202)
-            ],
-            voting="soft",
+        "LogReg_PCA10": make_pipeline(
+            PCA(n_components=10, random_state=42),
+            LogisticRegression(
+                C=0.1, max_iter=2000, class_weight="balanced", random_state=42
+            ),
         ),
-        "HybridVoting": VotingClassifier(
-            estimators=[
-                (
-                    "mlp",
-                    MLPClassifier(
-                        hidden_layer_sizes=(32, 16),
-                        alpha=1.0,
-                        max_iter=1000,
-                        random_state=42,
-                    ),
-                ),
-                (
-                    "svc",
-                    SVC(
-                        kernel="rbf",
-                        C=1.5,
-                        probability=True,
-                        class_weight="balanced",
-                        random_state=42,
-                    ),
-                ),
-                (
-                    "lr",
-                    LogisticRegression(
-                        C=0.5,
-                        max_iter=2000,
-                        class_weight="balanced",
-                        random_state=42,
-                    ),
-                ),
-                (
-                    "lgb",
-                    LGBMClassifier(
-                        n_estimators=80,
-                        max_depth=3,
-                        num_leaves=7,
-                        learning_rate=0.05,
-                        class_weight="balanced",
-                        random_state=42,
-                        verbose=-1,
-                    ),
-                ),
-            ],
-            voting="soft",
-            weights=[2, 1, 1, 1],
+        "LogReg_PCA8": make_pipeline(
+            PCA(n_components=8, random_state=42),
+            LogisticRegression(
+                C=0.1, max_iter=2000, class_weight="balanced", random_state=42
+            ),
         ),
-        "LogisticRegression": LogisticRegression(
-            C=0.5, max_iter=2000, class_weight="balanced", random_state=42
+        "LogReg_KBest25": make_pipeline(
+            SelectKBest(f_classif, k=25),
+            LogisticRegression(
+                C=0.15, max_iter=2000, class_weight="balanced", random_state=42
+            ),
         ),
-        "LightGBM": LGBMClassifier(
-            n_estimators=80,
-            max_depth=3,
-            num_leaves=7,
-            learning_rate=0.05,
-            class_weight="balanced",
-            random_state=42,
-            verbose=-1,
+        "SVC_PCA10": make_pipeline(
+            PCA(n_components=10, random_state=42),
+            SVC(
+                kernel="rbf",
+                C=0.5,
+                probability=True,
+                class_weight="balanced",
+                random_state=42,
+            ),
         ),
-        "SVC": SVC(
-            kernel="rbf", C=1.5, class_weight="balanced", random_state=42
+        "SVC_KBest20": make_pipeline(
+            SelectKBest(f_classif, k=20),
+            SVC(
+                kernel="rbf",
+                C=0.3,
+                probability=True,
+                class_weight="balanced",
+                random_state=42,
+            ),
         ),
-        "ExtraTrees": ExtraTreesClassifier(
-            n_estimators=300, max_depth=5, class_weight="balanced", random_state=42
+        "MLP_Regularized": make_pipeline(
+            SelectKBest(f_classif, k=20),
+            MLPClassifier(
+                hidden_layer_sizes=(16, 8),
+                alpha=4.0,
+                max_iter=2000,
+                random_state=42,
+            ),
         ),
-        "RandomForest": RandomForestClassifier(
-            n_estimators=300, max_depth=5, class_weight="balanced", random_state=42
+        "LGBM_Regularized": make_pipeline(
+            SelectKBest(f_classif, k=25),
+            LGBMClassifier(
+                n_estimators=40,
+                max_depth=2,
+                num_leaves=4,
+                min_child_samples=20,
+                reg_alpha=1.5,
+                reg_lambda=10.0,
+                colsample_bytree=0.5,
+                subsample=0.8,
+                subsample_freq=1,
+                learning_rate=0.05,
+                class_weight="balanced",
+                random_state=42,
+                verbose=-1,
+            ),
         ),
-        "GradientBoosting": GradientBoostingClassifier(
-            n_estimators=80, max_depth=2, learning_rate=0.05, random_state=42
+        "RF_Regularized": make_pipeline(
+            SelectKBest(f_classif, k=25),
+            RandomForestClassifier(
+                n_estimators=200,
+                max_depth=3,
+                min_samples_leaf=10,
+                class_weight="balanced",
+                random_state=42,
+            ),
         ),
     }
 
@@ -385,11 +369,7 @@ def train_model(frame: pd.DataFrame | None = None) -> dict:
         raise ValueError("Validasi group-aware membutuhkan setidaknya tiga kelompok train.")
 
     flip_frame = pd.read_csv(flip_path)
-    # Sinkronkan urutan baris flip dengan training_frame berdasarkan rel_path
-    flip_aligned = (
-        training_frame[["rel_path"]]
-        .merge(flip_frame, on="rel_path", how="left")
-    )
+    flip_aligned = training_frame[["rel_path"]].merge(flip_frame, on="rel_path", how="left")
     if flip_aligned[feature_columns].isna().any().any():
         raise ValueError("Data augmentasi horizontal tidak lengkap untuk subset latih.")
 
@@ -415,32 +395,39 @@ def train_model(frame: pd.DataFrame | None = None) -> dict:
     best_macro_f1 = -1.0
 
     for name, candidate in models.items():
-        fold_acc, fold_f1, fold_prec, fold_rec = [], [], [], []
+        fold_tr_acc, fold_acc, fold_f1, fold_prec, fold_rec = [], [], [], [], []
         for train_index, validation_index in folds:
-            # Augmentasi horizontal hanya diterapkan pada train_index di dalam fold (bebas kebocoran)
             X_tr = np.vstack([X[train_index], X_flip[train_index]])
             y_tr = np.concatenate([y[train_index], y[train_index]])
             X_val = X[validation_index]
             y_val = y[validation_index]
 
-            scaler_fold = StandardScaler().fit(X_tr)
+            # PowerTransformer (Yeo-Johnson) di-fit murni di dalam train fold
+            scaler_fold = PowerTransformer(method="yeo-johnson", standardize=True).fit(X_tr)
             X_tr_scaled = scaler_fold.transform(X_tr)
             X_val_scaled = scaler_fold.transform(X_val)
 
             est = clone(candidate)
             est.fit(X_tr_scaled, y_tr)
+
+            preds_tr = est.predict(X_tr_scaled)
             preds_val = est.predict(X_val_scaled)
 
+            fold_tr_acc.append(accuracy_score(y_tr, preds_tr))
             fold_acc.append(accuracy_score(y_val, preds_val))
             fold_f1.append(f1_score(y_val, preds_val, average="macro", zero_division=0))
             fold_prec.append(precision_score(y_val, preds_val, average="macro", zero_division=0))
             fold_rec.append(recall_score(y_val, preds_val, average="macro", zero_division=0))
 
+        tr_acc_mean = float(np.mean(fold_tr_acc))
+        val_acc_mean = float(np.mean(fold_acc))
         macro_f1 = float(np.mean(fold_f1))
         result = {
             "model": name,
-            "validation_accuracy_mean": float(np.mean(fold_acc)),
+            "train_accuracy_mean": tr_acc_mean,
+            "validation_accuracy_mean": val_acc_mean,
             "validation_accuracy_std": float(np.std(fold_acc)),
+            "train_val_gap": float(tr_acc_mean - val_acc_mean),
             "validation_macro_f1": macro_f1,
             "validation_macro_f1_std": float(np.std(fold_f1)),
             "validation_precision_macro_mean": float(np.mean(fold_prec)),
@@ -455,36 +442,12 @@ def train_model(frame: pd.DataFrame | None = None) -> dict:
     if best_model is None or best_name is None:
         raise RuntimeError("Tidak ada model yang berhasil dilatih.")
 
-    # Pelatihan final pada seluruh data pengembangan + augmentasi horizontal data pengembangan
     X_dev_aug = np.vstack([X, X_flip])
     y_dev_aug = np.concatenate([y, y])
-    groups_dev_aug = np.concatenate([groups, groups])
 
-    final_scaler = StandardScaler().fit(X_dev_aug)
+    final_scaler = PowerTransformer(method="yeo-johnson", standardize=True).fit(X_dev_aug)
     X_training = final_scaler.transform(X_dev_aug)
     final_model = clone(best_model)
-
-    if best_name == "SVC":
-        calibration_splitter = StratifiedGroupKFold(
-            n_splits=3, shuffle=True, random_state=43
-        )
-        calibration_folds = list(
-            calibration_splitter.split(X_training, y_dev_aug, groups_dev_aug)
-        )
-        for fold_number, (fit_index, calibration_index) in enumerate(
-            calibration_folds, start=1
-        ):
-            if set(y_dev_aug[fit_index]) != {0, 1} or set(y_dev_aug[calibration_index]) != {0, 1}:
-                raise ValueError(
-                    f"Fold kalibrasi SVC {fold_number} tidak memuat kedua kelas."
-                )
-            if set(groups_dev_aug[fit_index]) & set(groups_dev_aug[calibration_index]):
-                raise ValueError(f"Kelompok bocor pada kalibrasi SVC fold {fold_number}.")
-        final_model = CalibratedClassifierCV(
-            estimator=final_model,
-            method="sigmoid",
-            cv=calibration_folds,
-        )
     final_model.fit(X_training, y_dev_aug)
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -502,19 +465,22 @@ def train_model(frame: pd.DataFrame | None = None) -> dict:
     with (DEPLOYMENT_DIR / "feature_columns.json").open("w", encoding="utf-8") as file:
         json.dump(feature_columns, file, indent=2)
 
-    print(f"Model terpilih: {best_name} (macro-F1 validasi {best_macro_f1:.3f})")
+    train_acc_final = accuracy_score(y_dev_aug, final_model.predict(X_training))
+    print(f"Model terpilih: {best_name} (macro-F1 validasi {best_macro_f1:.3f}, train_acc {train_acc_final:.3f})")
     print(f"Model akhir dilatih pada {len(training_frame)} citra unik (+{len(training_frame)} augmentasi horizontal = {len(X_dev_aug)} sampel).")
     return {"model_name": best_name, "model": final_model, "results": results}
 
 
 def evaluate_model() -> dict:
+    train_path = PROCESSED_DIR / "train_features.csv"
     test_path = PROCESSED_DIR / "test_features.csv"
     model_path = MODEL_DIR / "best_model.joblib"
     scaler_path = MODEL_DIR / "scaler.joblib"
     feature_path = MODEL_DIR / "feature_columns.json"
-    if not all(path.is_file() for path in (test_path, model_path, scaler_path, feature_path)):
+    if not all(path.is_file() for path in (train_path, test_path, model_path, scaler_path, feature_path)):
         raise FileNotFoundError("Artefak test/model belum lengkap; jalankan prepare dan train.")
 
+    train_frame = pd.read_csv(train_path)
     test_frame = pd.read_csv(test_path)
     with feature_path.open(encoding="utf-8") as file:
         feature_columns = json.load(file)
@@ -531,6 +497,12 @@ def evaluate_model() -> dict:
     if test_groups & train_val_groups:
         raise ValueError("Kelompok pada test set juga muncul pada train/validasi.")
 
+    X_train_scaled = scaler.transform(train_frame[feature_columns].to_numpy())
+    y_train = train_frame["label"].to_numpy()
+    train_preds = model.predict(X_train_scaled)
+    train_acc = float(accuracy_score(y_train, train_preds))
+    train_f1_macro = float(f1_score(y_train, train_preds, average="macro", zero_division=0))
+
     X_test = scaler.transform(test_frame[feature_columns].to_numpy())
     y_test = test_frame["label"].to_numpy()
     predictions = model.predict(X_test)
@@ -540,11 +512,18 @@ def evaluate_model() -> dict:
     }
     positive_probabilities = probability_by_class[1]
 
+    test_acc = float(accuracy_score(y_test, predictions))
+    test_f1_macro = float(f1_score(y_test, predictions, average="macro", zero_division=0))
+
     metrics = {
         "model_name": type(model).__name__,
         "test_groups": sorted(test_groups),
+        "train_samples": int(len(train_frame)),
+        "train_accuracy": train_acc,
+        "train_f1_macro": train_f1_macro,
         "test_samples": int(len(test_frame)),
-        "test_accuracy": float(accuracy_score(y_test, predictions)),
+        "test_accuracy": test_acc,
+        "train_test_gap": float(train_acc - test_acc),
         "test_precision_weighted": float(
             precision_score(y_test, predictions, average="weighted", zero_division=0)
         ),
@@ -554,9 +533,7 @@ def evaluate_model() -> dict:
         "test_f1_weighted": float(
             f1_score(y_test, predictions, average="weighted", zero_division=0)
         ),
-        "test_f1_macro": float(
-            f1_score(y_test, predictions, average="macro", zero_division=0)
-        ),
+        "test_f1_macro": test_f1_macro,
         "test_roc_auc": float(roc_auc_score(y_test, positive_probabilities)),
         "confusion_matrix": confusion_matrix(y_test, predictions, labels=[0, 1]).tolist(),
         "classification_report": classification_report(
@@ -567,13 +544,11 @@ def evaluate_model() -> dict:
             output_dict=True,
             zero_division=0,
         ),
-        "target_accuracy_met": bool(accuracy_score(y_test, predictions) >= 0.85),
+        "target_accuracy_met": bool(test_acc >= 0.85),
         "target_weighted_f1_met": bool(
             f1_score(y_test, predictions, average="weighted", zero_division=0) >= 0.83
         ),
-        "target_macro_f1_met": bool(
-            f1_score(y_test, predictions, average="macro", zero_division=0) >= 0.83
-        ),
+        "target_macro_f1_met": bool(test_f1_macro >= 0.83),
     }
 
     EVALUATION_DIR.mkdir(parents=True, exist_ok=True)
@@ -590,11 +565,8 @@ def evaluate_model() -> dict:
     ).to_csv(EVALUATION_DIR / "test_predictions.csv", index=False)
 
     print(
-        f"Evaluasi pada {metrics['test_samples']} citra dari kelompok "
-        f"{', '.join(metrics['test_groups'])}: "
-        f"accuracy={metrics['test_accuracy']:.3f}, "
-        f"macro-F1={metrics['test_f1_macro']:.3f}, "
-        f"ROC-AUC={metrics['test_roc_auc']:.3f}"
+        f"Train Acc={train_acc:.3f}, Test Acc={test_acc:.3f} (Gap={train_acc - test_acc:+.3f}), "
+        f"Test Macro-F1={test_f1_macro:.3f}, ROC-AUC={metrics['test_roc_auc']:.3f}"
     )
     return metrics
 
